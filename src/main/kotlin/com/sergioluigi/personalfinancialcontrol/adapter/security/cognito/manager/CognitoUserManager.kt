@@ -25,9 +25,6 @@ class CognitoUserManager(
         const val EMAIL = "email"
         const val CELL_NUMBER = "custom:cellphone"
         const val BIRTH_DATE = "birthdate"
-        const val USERNAME = "USERNAME"
-        const val PASSWORD = "PASSWORD"
-        const val SECRET_HASH = "SECRET_HASH"
         const val PHONE_NUMBER = "phone_number"
         const val NAME = "name"
     }

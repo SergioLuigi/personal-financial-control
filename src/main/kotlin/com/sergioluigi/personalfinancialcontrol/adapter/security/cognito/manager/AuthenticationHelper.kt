@@ -25,7 +25,8 @@ import javax.crypto.spec.SecretKeySpec
  * Private class for SRP client side math.
  */
 @Component
-class AuthenticationHelper internal constructor() {
+class AuthenticationHelper{
+	
 	private var a: BigInteger? = null
 	private var A: BigInteger? = null
 	private val userPoolID: String
