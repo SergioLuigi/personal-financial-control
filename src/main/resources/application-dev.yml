@@ -1,0 +1,49 @@
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+
+spring:
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_SERVER_URL}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    show-sql: ${SHOW_SQL:false}
+    properties:
+      hibernate:
+        show_sql: ${SHOW_SQL:false}
+        format_sql: ${SHOW_SQL:false}
+        dll-auto: ${SHOW_SQL:false}
+
+  security:
+    oauth2:
+      client:
+        registration:
+          cognito:
+            clientId: ${COGNITO_CLIENT_ID}
+            clientName: ${COGNITO_CLIENT_NAME}
+            clientSecret: ${COGNITO_CLIENT_SECRET}
+            scope: openid, profile
+            redirect-uri: ${COGNITO_REDIRECT_URI}
+            authorization-grant-type: authorization_code
+        provider:
+          cognito:
+            authorization-uri: ${COGNITO_DOMAIN}/oauth2/authorize
+            token-uri: ${COGNITO_DOMAIN}/oauth2/token
+            user-info-uri: ${COGNITO_DOMAIN}/oauth2/userinfo
+            userNameAttribute: cognito:username
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${COGNITO_IDP_URI}/${COGNITO_POOL_ID}/.well-known/jwks.json
+          issuerUri: ${COGNITO_IDP_URI}/${COGNITO_POOL_ID}
+
+cognito:
+  domain: ${COGNITO_DOMAIN}
+  region: ${COGNITO_REGION}
+  poolId: ${COGNITO_POOL_ID}
+
+
