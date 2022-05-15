@@ -7,7 +7,7 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder
 import com.amazonaws.services.cognitoidp.model.*
 import com.amazonaws.util.Base64
 import com.amazonaws.util.StringUtils
-import com.sergioluigi.personalfinancialcontrol.adapter.security.extension.toByteArrayUTF8
+import com.sergioluigi.personalfinancialcontrol.core.domain.extension.toByteArrayUTF8
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ResponseStatusException

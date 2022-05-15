@@ -1,4 +1,4 @@
-package com.sergioluigi.personalfinancialcontrol.core.domain.exception.extension
+package com.sergioluigi.personalfinancialcontrol.core.domain.extension
 
 import com.sergioluigi.personalfinancialcontrol.core.domain.exception.PersonalFinancialControlError
 import org.springframework.web.server.ResponseStatusException

@@ -1,4 +1,4 @@
-package com.sergioluigi.personalfinancialcontrol.adapter.security.extension
+package com.sergioluigi.personalfinancialcontrol.adapter.security
 
 
 import com.sergioluigi.personalfinancialcontrol.adapter.security.cognito.CognitoAuthenticationToken

@@ -1,4 +1,4 @@
-package com.sergioluigi.personalfinancialcontrol.adapter.security.extension
+package com.sergioluigi.personalfinancialcontrol.core.domain.extension
 
 import java.nio.charset.StandardCharsets
 

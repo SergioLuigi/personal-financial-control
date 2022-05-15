@@ -1,7 +1,7 @@
 package com.sergioluigi.personalfinancialcontrol.adapter.api
 
 import com.sergioluigi.personalfinancialcontrol.adapter.security.cognito.Group
-import com.sergioluigi.personalfinancialcontrol.adapter.security.extension.getGrantedAuthorities
+import com.sergioluigi.personalfinancialcontrol.adapter.security.getGrantedAuthorities
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
