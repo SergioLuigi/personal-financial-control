@@ -6,10 +6,10 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider
 import com.amazonaws.services.cognitoidp.model.*
 import com.sergioluigi.personalfinancialcontrol.adapter.security.cognito.Group
 import com.sergioluigi.personalfinancialcontrol.adapter.security.cognito.configuration.CognitoConfigurationProperties
-import com.sergioluigi.personalfinancialcontrol.adapter.security.dto.AcessTokenDTO
 import com.sergioluigi.personalfinancialcontrol.adapter.security.dto.ConfirmSelfSignupDTO
 import com.sergioluigi.personalfinancialcontrol.adapter.security.dto.LoginDTO
 import com.sergioluigi.personalfinancialcontrol.adapter.security.dto.NewUserRequestDTO
+import com.sergioluigi.personalfinancialcontrol.adapter.security.dto.TokenDTO
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ResponseStatusException
@@ -54,13 +54,12 @@ class CognitoUserManager(
                 AttributeType()
                     .withName(BIRTH_DATE)
                     .withValue(newUserRequestDTO.birthDate.toString()))
-
-        val signUpResult = tryAWSAdminOperation { cognitoClient.signUp(signUpRequest) }
         
-                newUserRequestDTO.groups.forEach {
-                    addUserToGroup(newUserRequestDTO.cpf, it)
-                }
+        tryAWSAdminOperation { cognitoClient.signUp(signUpRequest) }
         
+        newUserRequestDTO.groups.forEach {
+            addUserToGroup(newUserRequestDTO.cpf, it)
+        }
 
     }
 
@@ -89,9 +88,9 @@ class CognitoUserManager(
         tryAWSAdminOperation { cognitoClient.resendConfirmationCode(resendConfirmationCodeRequest) }
     }
 
-    fun login(login: LoginDTO): AcessTokenDTO {
+    fun login(login: LoginDTO): TokenDTO {
         val authResult = authenticationHelper.performSRPAuthentication(login.username,login.password)
-        return AcessTokenDTO(authResult)
+        return TokenDTO(authResult)
     }
     
     private fun addUserToGroup(cpf: String, group: String = Group.REGULAR.name) {
