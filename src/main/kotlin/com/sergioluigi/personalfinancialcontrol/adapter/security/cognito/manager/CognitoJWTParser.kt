@@ -40,7 +40,7 @@ object CognitoJWTParser {
 	 * @param jwt REQUIRED: valid JSON Web Token as String.
 	 * @return payload as a JSONObject.
 	 */
-	fun getPayload(jwt: String): JSONObject {
+	private fun getPayload(jwt: String): JSONObject {
 		return try {
 			validateJWT(jwt)
 			val dec = Base64.getDecoder()
@@ -97,7 +97,7 @@ object CognitoJWTParser {
 	 *
 	 * @param jwt REQUIRED: The JWT as a [String].
 	 */
-	fun validateJWT(jwt: String) {
+	private fun validateJWT(jwt: String) {
 		// Check if the the JWT has the three parts
 		val jwtParts = jwt.split("\\.").toTypedArray()
 		if(jwtParts.size != JWT_PARTS) {

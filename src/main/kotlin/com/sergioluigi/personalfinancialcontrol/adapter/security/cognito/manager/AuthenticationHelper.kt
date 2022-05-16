@@ -1,18 +1,14 @@
 package com.sergioluigi.personalfinancialcontrol.adapter.security.cognito.manager
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider
-import com.amazonaws.auth.AnonymousAWSCredentials
-import com.amazonaws.regions.Regions
-import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder
+import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider
 import com.amazonaws.services.cognitoidp.model.*
 import com.amazonaws.util.Base64
 import com.amazonaws.util.StringUtils
-import com.sergioluigi.personalfinancialcontrol.core.domain.extension.toByteArrayUTF8
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ResponseStatusException
 import java.math.BigInteger
-import java.nio.charset.StandardCharsets
+import java.nio.charset.StandardCharsets.UTF_8
 import java.security.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -25,10 +21,12 @@ import javax.crypto.spec.SecretKeySpec
  * Private class for SRP client side math.
  */
 @Component
-class AuthenticationHelper{
+class AuthenticationHelper(
+	private val cognitoClient: AWSCognitoIdentityProvider
+){
 	
-	private var a: BigInteger? = null
-	private var A: BigInteger? = null
+	private lateinit var a: BigInteger
+	private lateinit var A: BigInteger
 	private val userPoolID: String
 	private val clientId: String
 	private val secretKey: String?
@@ -39,7 +37,7 @@ class AuthenticationHelper{
 		do {
 			a = BigInteger(EPHEMERAL_KEY_LENGTH, SECURE_RANDOM).mod(N)
 			A = g.modPow(a, N)
-		} while(A!!.mod(N) == BigInteger.ZERO)
+		} while(A.mod(N) == BigInteger.ZERO)
 		userPoolID = System.getenv("COGNITO_POOL_ID")
 		clientId = System.getenv("COGNITO_CLIENT_ID")
 		region = System.getenv("COGNITO_REGION")
@@ -48,7 +46,7 @@ class AuthenticationHelper{
 		
 	}
 	
-	private fun getA(): BigInteger? {
+	private fun getA(): BigInteger {
 		return A
 	}
 	
@@ -59,7 +57,7 @@ class AuthenticationHelper{
 		// u = H(A, B)
 		val messageDigest = THREAD_MESSAGE_DIGEST.get()
 		messageDigest.reset()
-		messageDigest.update(A!!.toByteArray())
+		messageDigest.update(A.toByteArray())
 		val u = BigInteger(1, messageDigest.digest(B.toByteArray()))
 		if(u == BigInteger.ZERO) {
 			throw SecurityException("Hash of A and B cannot be zero")
@@ -68,11 +66,11 @@ class AuthenticationHelper{
 		// x = H(salt | H(poolName | userId | ":" | password))
 		messageDigest.reset()
 		messageDigest.update(
-			userPoolIdHexa.toByteArrayUTF8()
+			userPoolIdHexa.toByteArray(UTF_8)
 		)
-		messageDigest.update(userId!!.toByteArrayUTF8())
-		messageDigest.update(":".toByteArrayUTF8())
-		val userIdHash = messageDigest.digest(userPassword.toByteArrayUTF8())
+		messageDigest.update(userId!!.toByteArray(UTF_8))
+		messageDigest.update(":".toByteArray(UTF_8))
+		val userIdHash = messageDigest.digest(userPassword.toByteArray(UTF_8))
 		messageDigest.reset()
 		messageDigest.update(salt.toByteArray())
 		val x = BigInteger(1, messageDigest.digest(userIdHash))
@@ -83,10 +81,9 @@ class AuthenticationHelper{
 				)
 			)
 		).modPow(
-			a!!.add(u.multiply(x)), N
+			a.add(u.multiply(x)), N
 		).mod(N)
-		val hkdf: Hkdf
-		hkdf = try {
+		val hkdf = try {
 			Hkdf.getInstance("HmacSHA256")
 		} catch(e: NoSuchAlgorithmException) {
 			throw SecurityException(e.message, e)
@@ -105,15 +102,12 @@ class AuthenticationHelper{
 	fun performSRPAuthentication(username: String, password: String): AuthenticationResultType {
 		val initiateAuthRequest = initiateUserSrpAuthRequest(username)
 		try {
-			val awsCreds = AnonymousAWSCredentials()
-			val cognitoIdentityProvider = AWSCognitoIdentityProviderClientBuilder.standard()
-				.withCredentials(AWSStaticCredentialsProvider(awsCreds)).withRegion(Regions.fromName(region)).build()
-			val initiateAuthResult = cognitoIdentityProvider.initiateAuth(initiateAuthRequest)
+			val initiateAuthResult = cognitoClient.initiateAuth(initiateAuthRequest)
 			if(ChallengeNameType.PASSWORD_VERIFIER.toString() == initiateAuthResult.challengeName) {
 				val challengeRequest = userSrpAuthRequest(
 					initiateAuthResult, password, initiateAuthRequest.authParameters["SECRET_HASH"]
 				)
-				val result = cognitoIdentityProvider.respondToAuthChallenge(challengeRequest)
+				val result = cognitoClient.respondToAuthChallenge(challengeRequest)
 				return result.authenticationResult ?: throw NullPointerException("Wrong username or password")
 			}
 		} catch(ex: Exception) {
@@ -133,14 +127,14 @@ class AuthenticationHelper{
 		initiateAuthRequest.setAuthFlow(AuthFlowType.USER_SRP_AUTH)
 		initiateAuthRequest.clientId = clientId
 		//Only to be used if the pool contains the secret key.
-		if(secretKey != null && !secretKey.isEmpty()) {
+		if(!secretKey.isNullOrEmpty()) {
 			initiateAuthRequest.addAuthParametersEntry(
 				"SECRET_HASH",
 				calculateSecretHash(clientId, secretKey, username)
 			)
 		}
 		initiateAuthRequest.addAuthParametersEntry("USERNAME", username)
-		initiateAuthRequest.addAuthParametersEntry("SRP_A", getA()!!.toString(16))
+		initiateAuthRequest.addAuthParametersEntry("SRP_A", getA().toString(16))
 		return initiateAuthRequest
 	}
 	
@@ -168,14 +162,14 @@ class AuthenticationHelper{
 			val mac = Mac.getInstance("HmacSHA256")
 			val keySpec = SecretKeySpec(key, "HmacSHA256")
 			mac.init(keySpec)
-			mac.update(userPoolIdHexa.toByteArrayUTF8())
-			mac.update(userIdForSRP!!.toByteArrayUTF8())
+			mac.update(userPoolIdHexa.toByteArray(UTF_8))
+			mac.update(userIdForSRP!!.toByteArray(UTF_8))
 			val secretBlock = Base64.decode(challenge.challengeParameters["SECRET_BLOCK"])
 			mac.update(secretBlock)
 			val simpleDateFormat = SimpleDateFormat("EEE MMM d HH:mm:ss z yyyy", Locale.US)
 			simpleDateFormat.timeZone = SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC")
 			val dateString = simpleDateFormat.format(timestamp)
-			val dateBytes = dateString.toByteArrayUTF8()
+			val dateBytes = dateString.toByteArray(UTF_8)
 			hmac = mac.doFinal(dateBytes)
 		} catch(e: Exception) {
 			println(e)
@@ -187,15 +181,14 @@ class AuthenticationHelper{
 		srpAuthResponses["PASSWORD_CLAIM_SIGNATURE"] = String(Base64.encode(hmac), StringUtils.UTF8)
 		srpAuthResponses["TIMESTAMP"] = formatTimestamp.format(timestamp)
 		srpAuthResponses["USERNAME"] = usernameInternal
-		if(secretHash != null && !secretHash.isEmpty()) {
+		if(!secretHash.isNullOrEmpty()) {
 			srpAuthResponses["SECRET_HASH"] = secretHash
 		}
-		val authChallengeRequest = RespondToAuthChallengeRequest()
-		authChallengeRequest.challengeName = challenge.challengeName
-		authChallengeRequest.clientId = clientId
-		authChallengeRequest.session = challenge.session
-		authChallengeRequest.challengeResponses = srpAuthResponses
-		return authChallengeRequest
+		return RespondToAuthChallengeRequest()
+			.withChallengeName(challenge.challengeName)
+			.withClientId(clientId)
+			.withSession(challenge.session)
+			.withChallengeResponses(srpAuthResponses)
 	}
 	
 	/**
@@ -209,13 +202,13 @@ class AuthenticationHelper{
 	fun calculateSecretHash(userPoolClientId: String, userPoolClientSecret: String, userName: String): String {
 		val HMAC_SHA256_ALGORITHM = "HmacSHA256"
 		val signingKey = SecretKeySpec(
-			userPoolClientSecret.toByteArray(StandardCharsets.UTF_8), HMAC_SHA256_ALGORITHM
+			userPoolClientSecret.toByteArray(UTF_8), HMAC_SHA256_ALGORITHM
 		)
 		return try {
 			val mac = Mac.getInstance(HMAC_SHA256_ALGORITHM)
 			mac.init(signingKey)
-			mac.update(userName.toByteArray(StandardCharsets.UTF_8))
-			val rawHmac = mac.doFinal(userPoolClientId.toByteArray(StandardCharsets.UTF_8))
+			mac.update(userName.toByteArray(UTF_8))
+			val rawHmac = mac.doFinal(userPoolClientId.toByteArray(UTF_8))
 			java.util.Base64.getEncoder().encodeToString(rawHmac)
 		} catch(e: Exception) {
 			throw RuntimeException("Error while calculating ")
@@ -250,11 +243,11 @@ class AuthenticationHelper{
 		 * @param salt REQUIRED: Random bytes for salt.
 		 */
 		fun init(ikm: ByteArray, salt: ByteArray?) {
-			var realSalt = if(salt == null) EMPTY_ARRAY else salt.clone()
+			var realSalt = salt?.clone() ?: EMPTY_ARRAY
 			var rawKeyMaterial = EMPTY_ARRAY
 			try {
 				val e = Mac.getInstance(algorithm)
-				if(realSalt.size == 0) {
+				if(realSalt.isEmpty()) {
 					realSalt = ByteArray(e.macLength)
 					Arrays.fill(realSalt, 0.toByte())
 				}
@@ -291,7 +284,7 @@ class AuthenticationHelper{
 		 * @return converted bytes.
 		 */
 		fun deriveKey(info: String?, length: Int): ByteArray {
-			return this.deriveKey(info?.toByteArrayUTF8(), length)
+			return this.deriveKey(info?.toByteArray(UTF_8), length)
 		}
 		
 		/**
