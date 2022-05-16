@@ -23,4 +23,8 @@ class CognitoConfigurationProperties {
 
     @Value("\${cognito.poolId}")
     lateinit var poolId: String
+    
+    var secretKey: String = System.getenv("COGNITO_CLIENT_SECRET")
+    
+    var poolIdHexa: String = System.getenv("COGNITO_POOL_ID_HEXA")
 }

@@ -4,6 +4,7 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider
 import com.amazonaws.services.cognitoidp.model.*
 import com.amazonaws.util.Base64
 import com.amazonaws.util.StringUtils
+import com.sergioluigi.personalfinancialcontrol.adapter.security.cognito.configuration.CognitoConfigurationProperties
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ResponseStatusException
@@ -22,28 +23,18 @@ import javax.crypto.spec.SecretKeySpec
  */
 @Component
 class AuthenticationHelper(
-	private val cognitoClient: AWSCognitoIdentityProvider
+	private val cognitoClient: AWSCognitoIdentityProvider,
+	private val cognitoProperties: CognitoConfigurationProperties
 ){
 	
 	private lateinit var a: BigInteger
 	private lateinit var A: BigInteger
-	private val userPoolID: String
-	private val clientId: String
-	private val secretKey: String?
-	private val region: String
-	private val userPoolIdHexa: String
 	
 	init {
 		do {
 			a = BigInteger(EPHEMERAL_KEY_LENGTH, SECURE_RANDOM).mod(N)
 			A = g.modPow(a, N)
 		} while(A.mod(N) == BigInteger.ZERO)
-		userPoolID = System.getenv("COGNITO_POOL_ID")
-		clientId = System.getenv("COGNITO_CLIENT_ID")
-		region = System.getenv("COGNITO_REGION")
-		secretKey = System.getenv("COGNITO_CLIENT_SECRET")
-		userPoolIdHexa = System.getenv("COGNITO_POOL_ID_HEXA")
-		
 	}
 	
 	private fun getA(): BigInteger {
@@ -66,7 +57,7 @@ class AuthenticationHelper(
 		// x = H(salt | H(poolName | userId | ":" | password))
 		messageDigest.reset()
 		messageDigest.update(
-			userPoolIdHexa.toByteArray(UTF_8)
+			cognitoProperties.poolIdHexa.toByteArray(UTF_8)
 		)
 		messageDigest.update(userId!!.toByteArray(UTF_8))
 		messageDigest.update(":".toByteArray(UTF_8))
@@ -125,12 +116,12 @@ class AuthenticationHelper(
 	private fun initiateUserSrpAuthRequest(username: String): InitiateAuthRequest {
 		val initiateAuthRequest = InitiateAuthRequest()
 		initiateAuthRequest.setAuthFlow(AuthFlowType.USER_SRP_AUTH)
-		initiateAuthRequest.clientId = clientId
+		initiateAuthRequest.clientId = cognitoProperties.clientId
 		//Only to be used if the pool contains the secret key.
-		if(!secretKey.isNullOrEmpty()) {
+		if(!cognitoProperties.secretKey.isNullOrEmpty()) {
 			initiateAuthRequest.addAuthParametersEntry(
 				"SECRET_HASH",
-				calculateSecretHash(clientId, secretKey, username)
+				calculateSecretHash(cognitoProperties.clientId, cognitoProperties.secretKey, username)
 			)
 		}
 		initiateAuthRequest.addAuthParametersEntry("USERNAME", username)
@@ -162,7 +153,7 @@ class AuthenticationHelper(
 			val mac = Mac.getInstance("HmacSHA256")
 			val keySpec = SecretKeySpec(key, "HmacSHA256")
 			mac.init(keySpec)
-			mac.update(userPoolIdHexa.toByteArray(UTF_8))
+			mac.update(cognitoProperties.poolIdHexa.toByteArray(UTF_8))
 			mac.update(userIdForSRP!!.toByteArray(UTF_8))
 			val secretBlock = Base64.decode(challenge.challengeParameters["SECRET_BLOCK"])
 			mac.update(secretBlock)
@@ -186,7 +177,7 @@ class AuthenticationHelper(
 		}
 		return RespondToAuthChallengeRequest()
 			.withChallengeName(challenge.challengeName)
-			.withClientId(clientId)
+			.withClientId(cognitoProperties.clientId)
 			.withSession(challenge.session)
 			.withChallengeResponses(srpAuthResponses)
 	}
