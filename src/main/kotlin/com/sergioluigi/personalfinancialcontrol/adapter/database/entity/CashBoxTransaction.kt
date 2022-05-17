@@ -17,6 +17,14 @@ class CashBoxTransaction(
     @Id
     @GeneratedValue
     val id: UUID,
+    
+    @ManyToOne
+    @JoinColumn(name="user_id", nullable = false)
+    val user: User,
+    
+    @Column(name = "operation")
+    @Enumerated(EnumType.STRING)
+    val operation: CashBoxTransactionOperaion,
 
     @ManyToOne
     @JoinColumn(name="cash_box_id", nullable = false)
@@ -27,6 +35,7 @@ class CashBoxTransaction(
 
     @Column(name="value", nullable = false)
     val value: BigDecimal,
+    
 
 ): Serializable {
 

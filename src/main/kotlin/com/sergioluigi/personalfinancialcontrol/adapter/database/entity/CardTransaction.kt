@@ -29,7 +29,7 @@ class CardTransaction(
     val recurrent: Boolean = false,
 
     @Column(name="installments", nullable = false)
-    val installments: BigDecimal = BigDecimal.ZERO,
+    val installments: BigDecimal = BigDecimal.ONE,
 
     @Column(name="value", nullable = false)
     val value: BigDecimal,

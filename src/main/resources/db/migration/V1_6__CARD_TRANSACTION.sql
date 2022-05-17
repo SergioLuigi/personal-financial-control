@@ -3,7 +3,7 @@ create table card_transaction(
 	card_id uuid not null,
 	"description" varchar(150) not null,
 	recurrent bool default false,
-	installments decimal(2) default 0,
+	installments decimal(2) default 1,
 	"value" decimal(8,2) not null,
 	"limit" decimal(8,2) default 0.00,
     create_date timestamp not null,

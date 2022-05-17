@@ -15,9 +15,8 @@ spring:
     show-sql: ${SHOW_SQL:false}
     properties:
       hibernate:
-        show_sql: ${SHOW_SQL:false}
         format_sql: ${SHOW_SQL:false}
-        dll-auto: ${SHOW_SQL:false}
+        ddl-auto: validate
 
   security:
     oauth2:

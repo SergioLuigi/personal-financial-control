@@ -16,6 +16,10 @@ class BankAccountTransaction(
     @Id
     @GeneratedValue
     val id: UUID,
+    
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    val user: User,
 
     @ManyToOne
     @JoinColumn(name="bank_account_id", nullable = false)

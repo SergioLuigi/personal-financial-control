@@ -18,6 +18,10 @@ class Card(
     @Id
     @GeneratedValue
     val id: UUID,
+    
+    @ManyToOne
+    @JoinColumn(name="owner_user_id", nullable = false)
+    val owner: User,
 
     @ManyToOne
     @JoinColumn(name="bank_account_id", nullable = false)
