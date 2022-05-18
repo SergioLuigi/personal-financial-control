@@ -1,5 +1,6 @@
 package com.sergioluigi.personalfinancialcontrol.adapter.database.entity
 
+import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -18,10 +19,6 @@ class CashBoxTransaction(
     @GeneratedValue
     val id: UUID,
     
-    @ManyToOne
-    @JoinColumn(name="user_id", nullable = false)
-    val user: User,
-    
     @Column(name = "operation")
     @Enumerated(EnumType.STRING)
     val operation: CashBoxTransactionOperaion,
@@ -38,6 +35,11 @@ class CashBoxTransaction(
     
 
 ): Serializable {
+    
+    @ManyToOne
+    @CreatedBy
+    @JoinColumn(name = "user_id", nullable = false)
+    lateinit var user: User
 
     @CreatedDate
     lateinit var createDate: LocalDateTime

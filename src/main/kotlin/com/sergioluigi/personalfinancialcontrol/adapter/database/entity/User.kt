@@ -20,6 +20,9 @@ data class User(
     @Column(name="username", length = 20, nullable = false, unique = true)
     val username: String,
 
+    @Column(name="cpf", length = 11, nullable = false, unique = true)
+    val cpf: String,
+
     @Column(name="email", length = 120, nullable = false, unique = true)
     val email: String,
 

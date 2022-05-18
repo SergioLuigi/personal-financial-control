@@ -1,5 +1,6 @@
 package com.sergioluigi.personalfinancialcontrol.adapter.database.entity
 
+import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -18,10 +19,6 @@ class CashBox(
     @GeneratedValue
     val id: UUID,
 
-    @OneToOne
-    @JoinColumn(name="user_id", nullable = false)
-    val user: User,
-
     @Column(name="description", length = 150, nullable = false)
     val description: String,
 
@@ -32,6 +29,11 @@ class CashBox(
     val balance: BigDecimal = BigDecimal.ZERO,
 
 ): Serializable {
+    
+    @ManyToOne
+    @CreatedBy
+    @JoinColumn(name = "user_id", nullable = false)
+    lateinit var user: User
 
     @OneToMany(mappedBy = "cashBox")
     var transactions: Set<CashBoxTransaction> = emptySet()

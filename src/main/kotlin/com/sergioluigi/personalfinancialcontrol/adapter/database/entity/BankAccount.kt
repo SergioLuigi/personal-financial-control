@@ -1,5 +1,6 @@
 package com.sergioluigi.personalfinancialcontrol.adapter.database.entity
 
+import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -17,10 +18,6 @@ class BankAccount(
     @Id
     @GeneratedValue
     val id: UUID,
-
-    @ManyToOne
-    @JoinColumn(name="user_id", nullable = false)
-    val user: User,
 
     @ManyToOne
     @JoinColumn(name="bank_id", nullable = false)
@@ -55,6 +52,11 @@ class BankAccount(
 
     @OneToMany(mappedBy = "bankAccount")
     var transactions: Set<BankAccountTransaction> = emptySet()
+    
+    @ManyToOne
+    @CreatedBy
+    @JoinColumn(name = "user_id", nullable = false)
+    lateinit var user: User
 
     @CreatedDate
     lateinit var createDate: LocalDateTime

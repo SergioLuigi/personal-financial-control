@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import java.util.*
 
 interface UserRepository: JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {
+	fun findByCpfOrNull(cpf: String): User?
 }
