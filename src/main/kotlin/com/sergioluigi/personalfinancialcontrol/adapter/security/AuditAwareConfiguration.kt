@@ -19,10 +19,8 @@ class AuditAwareConfiguration {
 			if(authentication == null || !authentication.isAuthenticated || authentication is AnonymousAuthenticationToken){
 				Optional.empty()
 			}else{
-				Optional.ofNullable(userRepository.findByCpfOrNull(authentication.getCPF()))
+				Optional.ofNullable(userRepository.findByCpf(authentication.getCPF()))
 			}
 		}
-		
-		
 
 }
