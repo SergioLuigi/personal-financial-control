@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: /db/changelog/changes/V1_0__CREATE_TABLE_CATEGORY.yaml
+  - include:
+      file: /db/changelog/changes/V2_0__CREATE_TABLE_USER.yaml
+  - include:
+      file: /db/changelog/changes/V3_0__CREATE_TABLE_ACCOUNT.yaml

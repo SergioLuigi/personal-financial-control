@@ -1,0 +1,56 @@
+databaseChangeLog:
+  - changeSet:
+      id: V3_0__CREATE_ACCOUNT
+      author: Sergio Luigi
+      changes:
+        - createTable:
+            tableName: account
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    unique: true
+              - column:
+                  name: overdraft_limit
+                  type: DOUBLE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: balance
+                  type: DOUBLE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_on
+                  type: datetime
+              - column:
+                  name: last_update_on
+                  type: datetime
+              - column:
+                  name: was_deleted
+                  type: tinyint(1)
+                  constraints:
+                    nullable: false
+                  defaultValueNumeric: 0
+        - addForeignKeyConstraint:
+            baseTableName: account
+            baseColumnNames: user_id
+            constraintName: fk_account_user
+            referencedTableName: user
+            referencedColumnNames: id
+        - addUniqueConstraint:
+            tableName: account
+            columnNames: user_id, name
+            constraintName: uq_account_user_id_name

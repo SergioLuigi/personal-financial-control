@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: V1_0__CREATE_CATEGORY
+      author: Sergio Luigi
+      changes:
+        - createTable:
+            tableName: category
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: description
+                  type: varchar(250)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: color
+                  type: varchar(250)
+              - column:
+                  name: created_on
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_update_on
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: was_deleted
+                  type: tinyint(1)
+                  constraints:
+                    nullable: false
+                  defaultValueNumeric: 0
+
