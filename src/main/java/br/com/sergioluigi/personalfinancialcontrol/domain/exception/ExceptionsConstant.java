@@ -10,6 +10,8 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 @AllArgsConstructor
 public enum ExceptionsConstant {
 
+    PROPERTY_DOESNT_EXIST(HttpStatus.BAD_REQUEST, "One of the properties doesn't exist"),
+
     ACCOUNT_DOESNT_BELONG_TO_LOGGED_USER(INTERNAL_SERVER_ERROR, "Account doesn't belong to logged user"),
 
     AUTHENTICATION_ERROR(INTERNAL_SERVER_ERROR, "Authentication error"),

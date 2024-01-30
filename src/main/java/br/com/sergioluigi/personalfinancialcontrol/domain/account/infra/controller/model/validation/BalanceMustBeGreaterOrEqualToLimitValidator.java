@@ -14,6 +14,11 @@ public class BalanceMustBeGreaterOrEqualToLimitValidator
 
     @Override
     public boolean isValid(AccountRequest value, ConstraintValidatorContext context) {
-        return value.overdraftLimit() + value.balance() >= 0;
+
+        if(value.getOverdraftLimit() != null && value.getBalance() != null) {
+            return value.getOverdraftLimit() + value.getBalance() >= 0;
+        }
+
+        return true;
     }
 }

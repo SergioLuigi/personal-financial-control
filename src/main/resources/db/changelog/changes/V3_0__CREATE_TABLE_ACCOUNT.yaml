@@ -19,7 +19,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: name
-                  type: VARCHAR(255)
+                  type: VARCHAR(150)
                   constraints:
                     unique: true
               - column:
@@ -27,11 +27,13 @@ databaseChangeLog:
                   type: DOUBLE
                   constraints:
                     nullable: false
+                  defaultValueNumeric: 0
               - column:
                   name: balance
                   type: DOUBLE
                   constraints:
                     nullable: false
+                  defaultValueNumeric: 0
               - column:
                   name: created_on
                   type: datetime

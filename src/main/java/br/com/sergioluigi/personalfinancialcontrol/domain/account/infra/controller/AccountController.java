@@ -12,6 +12,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.*;
@@ -52,6 +53,13 @@ public class AccountController {
     @IsAuthenticatedUserAccountOwner
     public AccountResponse update(@PathVariable UUID id, @Valid @RequestBody AccountRequest accountRequest) {
         return new AccountResponse(updateAccount.execute(id, accountRequest.toModel()));
+    }
+
+    @ResponseStatus(OK)
+    @PatchMapping("/{id}")
+    @IsAuthenticatedUserAccountOwner
+    public AccountResponse patch(@PathVariable UUID id, @RequestBody Map<String, Object> properties) {
+        return new AccountResponse(updateAccount.execute(id, properties));
     }
 
     @DeleteMapping("/{id}")

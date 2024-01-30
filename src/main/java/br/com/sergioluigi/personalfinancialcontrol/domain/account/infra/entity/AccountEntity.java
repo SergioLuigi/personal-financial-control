@@ -1,29 +1,22 @@
 package br.com.sergioluigi.personalfinancialcontrol.domain.account.infra.entity;
 
 import br.com.sergioluigi.personalfinancialcontrol.domain.account.domain.model.AccountModel;
-import br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.infra.entity.CreditCardEntity;
 import br.com.sergioluigi.personalfinancialcontrol.domain.user.infra.repository.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.SoftDelete;
 import org.hibernate.type.SqlTypes;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
-
-import static jakarta.persistence.CascadeType.REMOVE;
 
 @Data
 @Entity
@@ -41,7 +34,7 @@ public class AccountEntity {
     @JdbcTypeCode(SqlTypes.VARCHAR)
     private UUID id;
 
-    @Column(unique = true)
+    @Column(unique = true, length = 150)
     private String name;
 
     @Column(nullable = false)
