@@ -36,7 +36,7 @@ public class UpdateAccount {
         var owner = account.getUser();
 
         if (!account.getName().equals(updatedAccountModel.getName())) {
-            isAccountNameUniqueByUserIdService.check(updatedAccountModel.getName(), owner.getId());
+            isAccountNameUniqueByUserIdService.check(updatedAccountModel.getName(), owner);
         }
 
         account.update(id, updatedAccountModel);
@@ -62,7 +62,7 @@ public class UpdateAccount {
             if (fieldName.equals("name") &&
                     newValue instanceof String &&
                         !account.getName().equals(newValue.toString())) {
-                isAccountNameUniqueByUserIdService.check(newValue.toString(), account.getUser().getId());
+                isAccountNameUniqueByUserIdService.check(newValue.toString(), account.getUser());
             }
 
             ReflectionUtils.setField(field, accountRequest, newValue);

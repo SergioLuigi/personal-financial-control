@@ -21,7 +21,7 @@ public class CreateAccount {
 
         var currentUser = findUserByUsername.execute(name);
 
-        isAccountNameUniqueByUserIdService.check(accountModel.getName(), currentUser.getId());
+        isAccountNameUniqueByUserIdService.check(accountModel.getName(), currentUser);
 
         accountModel.setUser(currentUser);
 

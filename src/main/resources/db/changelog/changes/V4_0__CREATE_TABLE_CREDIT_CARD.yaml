@@ -1,10 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: V3_0__CREATE_ACCOUNT
+      id: V4_0__CREATE_TABLE_CREDIT_CARD
       author: Sergio Luigi
       changes:
         - createTable:
-            tableName: account
+            tableName: credit_card
             columns:
               - column:
                   name: id
@@ -13,17 +13,17 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: user_id
-                  type: UUID
-                  constraints:
-                    nullable: false
-              - column:
                   name: name
                   type: VARCHAR(150)
                   constraints:
                     unique: true
               - column:
-                  name: overdraft_limit
+                  name: account_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: credit_card_limit
                   type: DOUBLE
                   constraints:
                     nullable: false
@@ -35,24 +35,31 @@ databaseChangeLog:
                     nullable: false
                   defaultValueNumeric: 0.0
               - column:
-                  name: created_on
-                  type: datetime
-              - column:
-                  name: last_update_on
-                  type: datetime
-              - column:
-                  name: was_deleted
-                  type: tinyint(1)
+                  name: due_date
+                  type: DATE
                   constraints:
                     nullable: false
-                  defaultValueNumeric: 0
+              - column:
+                  name: closing_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_on
+                  type: TIMESTAMP
+              - column:
+                  name: last_update_on
+                  type: TIMESTAMP
+              - column:
+                  name: was_deleted
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+                    defaultValueBoolean: false
         - addForeignKeyConstraint:
-            baseTableName: account
-            baseColumnNames: user_id
-            constraintName: fk_account_user
-            referencedTableName: user
+            baseTableName: credit_card
+            baseColumnNames: account_id
+            constraintName: fk_credit_card_account
+            referencedTableName: account
             referencedColumnNames: id
-        - addUniqueConstraint:
-            tableName: account
-            columnNames: user_id, name
-            constraintName: uq_account_user_id_name
+            onDelete: CASCADE

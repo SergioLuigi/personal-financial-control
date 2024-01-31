@@ -15,6 +15,6 @@ public class UpdateCreditCardRepositoryImpl implements UpdateCreditCardRepositor
 
     @Override
     public CreditCardModel execute(CreditCardModel creditCardModel) {
-        return creditCardRepository.save(new CreditCardEntity(creditCardModel)).toModel();
+        return creditCardRepository.save(CreditCardEntity.of(creditCardModel)).toModel();
     }
 }

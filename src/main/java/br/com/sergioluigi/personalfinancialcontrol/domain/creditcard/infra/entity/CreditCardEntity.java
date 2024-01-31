@@ -5,6 +5,7 @@ import br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.domain.mode
 import jakarta.persistence.Table;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.*;
@@ -21,6 +22,7 @@ import static jakarta.persistence.CascadeType.REMOVE;
 
 @Data
 @Entity
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "credit_card")
@@ -38,9 +40,10 @@ public class CreditCardEntity {
     private String name;
 
     @ManyToOne(cascade = REMOVE)
+    @JoinColumn(name = "account_id")
     private AccountEntity account;
 
-    @Column(nullable = false)
+    @Column(name = "credit_card_limit", nullable = false)
     private Double limit;
 
     @Column(nullable = false)
@@ -58,17 +61,18 @@ public class CreditCardEntity {
     @LastModifiedDate
     private LocalDateTime lastUpdateOn;
 
-    private boolean wasDeleted;
-
-    public CreditCardEntity(CreditCardModel creditCardModel) {
-        this.id = creditCardModel.getId();
-        this.name = creditCardModel.getName();
-        this.limit = creditCardModel.getLimit();
-        this.balance = creditCardModel.getBalance();
-        this.closingDate = creditCardModel.getClosingDate();
-        this.dueDate = creditCardModel.getDueDate();
-        this.createdOn = creditCardModel.getCreatedOn();
-        this.lastUpdateOn = creditCardModel.getLastUpdateOn();
+    public static CreditCardEntity of(CreditCardModel creditCardModel) {
+        return CreditCardEntity.builder()
+                .id(creditCardModel.getId())
+                .name(creditCardModel.getName())
+                .limit(creditCardModel.getLimit())
+                .balance(creditCardModel.getBalance())
+                .closingDate(creditCardModel.getClosingDate())
+                .dueDate(creditCardModel.getDueDate())
+                .account(AccountEntity.of(creditCardModel.getAccountModel()))
+                .createdOn(creditCardModel.getCreatedOn())
+                .lastUpdateOn(creditCardModel.getLastUpdateOn())
+                .build();
     }
 
     public CreditCardModel toModel() {
@@ -78,6 +82,7 @@ public class CreditCardEntity {
                 .balance(this.balance)
                 .closingDate(this.closingDate)
                 .dueDate(this.dueDate)
+                .accountModel(this.account.toModel())
                 .createdOn(this.createdOn)
                 .lastUpdateOn(this.lastUpdateOn)
                 .build();

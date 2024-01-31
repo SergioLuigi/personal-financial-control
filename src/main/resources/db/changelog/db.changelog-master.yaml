@@ -5,3 +5,5 @@ databaseChangeLog:
       file: /db/changelog/changes/V2_0__CREATE_TABLE_USER.yaml
   - include:
       file: /db/changelog/changes/V3_0__CREATE_TABLE_ACCOUNT.yaml
+  - include:
+      file: /db/changelog/changes/V4_0__CREATE_TABLE_CREDIT_CARD.yaml

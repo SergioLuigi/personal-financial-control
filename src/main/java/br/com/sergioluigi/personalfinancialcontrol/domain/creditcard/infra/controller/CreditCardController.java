@@ -1,8 +1,10 @@
-package br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.infra.rest;
+package br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.infra.controller;
 
-import br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.infra.rest.model.CreditCardRequest;
-import br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.infra.rest.model.CreditCardResponse;
+import br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.infra.controller.model.CreditCardRequest;
+import br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.infra.controller.model.CreditCardResponse;
+import br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.infra.controller.validation.IsAuthenticatedUserCreditCardOwner;
 import br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.usecase.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -10,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.*;
@@ -36,26 +39,31 @@ public class CreditCardController {
 
     @ResponseStatus(OK)
     @GetMapping("/{id}")
+    @IsAuthenticatedUserCreditCardOwner
     public CreditCardResponse findById(@PathVariable UUID id) {
         return new CreditCardResponse(this.findCreditCardById.execute(id));
     }
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public CreditCardResponse create(@RequestBody CreditCardRequest creditCardRequest) {
-        return new CreditCardResponse(this.saveCreditCard.execute(creditCardRequest.toModel()));
+    public CreditCardResponse create(
+            @Valid @RequestBody CreditCardRequest creditCardRequest,
+            Principal principal) {
+        return new CreditCardResponse(this.saveCreditCard.execute(principal.getName(), creditCardRequest.toModel()));
     }
 
     @ResponseStatus(OK)
     @PutMapping("/{id}")
+    @IsAuthenticatedUserCreditCardOwner
     public CreditCardResponse update(
             @PathVariable UUID id,
-            @RequestBody CreditCardRequest creditCardRequest) {
+            @Valid @RequestBody CreditCardRequest creditCardRequest) {
         return new CreditCardResponse(this.updateCreditCard.execute(id, creditCardRequest.toModel()));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
+    @IsAuthenticatedUserCreditCardOwner
     public void delete(@PathVariable UUID id) {
         this.deleteCreditCard.execute(id);
     }

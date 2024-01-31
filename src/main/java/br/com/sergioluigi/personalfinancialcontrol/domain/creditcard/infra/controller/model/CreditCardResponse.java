@@ -1,4 +1,4 @@
-package br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.infra.rest.model;
+package br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.infra.controller.model;
 
 import br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.domain.model.CreditCardModel;
 

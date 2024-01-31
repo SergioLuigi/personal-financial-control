@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
 public interface CreditCardRepository extends JpaRepository<CreditCardEntity, UUID> {
-    Boolean existsByName(String name);
+    Boolean existsByNameAndAccount_User_username(String name, String username);
 }

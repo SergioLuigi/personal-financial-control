@@ -1,18 +1,18 @@
 package br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.infra.repository.impl;
 
-import br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.domain.repository.IsCreditCardUniqueByNameRepository;
+import br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.domain.repository.IsCreditCardNameUniqueByUsernameRepository;
 import br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.infra.repository.CreditCardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class IsCreditCardUniqueByNameRepositoryImpl implements IsCreditCardUniqueByNameRepository {
+public class IsCreditCardNameUniqueByUsernameRepositoryImpl implements IsCreditCardNameUniqueByUsernameRepository {
 
     private final CreditCardRepository creditCardRepository;
 
     @Override
-    public Boolean check(String name) {
-        return !creditCardRepository.existsByName(name);
+    public Boolean check(String name, String username) {
+        return !creditCardRepository.existsByNameAndAccount_User_username(name, username);
     }
 }

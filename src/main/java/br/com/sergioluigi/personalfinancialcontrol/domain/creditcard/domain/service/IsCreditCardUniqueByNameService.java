@@ -1,7 +1,7 @@
 package br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.domain.service;
 
+import br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.domain.repository.IsCreditCardNameUniqueByUsernameRepository;
 import br.com.sergioluigi.personalfinancialcontrol.domain.exception.ApplicationException;
-import br.com.sergioluigi.personalfinancialcontrol.domain.creditcard.domain.repository.IsCreditCardUniqueByNameRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,17 +11,11 @@ import static br.com.sergioluigi.personalfinancialcontrol.domain.exception.Excep
 @RequiredArgsConstructor
 public class IsCreditCardUniqueByNameService {
 
-    private final IsCreditCardUniqueByNameRepository isCreditCardUniqueByNameRepository;
+    private final IsCreditCardNameUniqueByUsernameRepository isCreditCardNameUniqueByUsernameRepository;
 
-    public void check(String name) {
-        if (!isCreditCardUniqueByNameRepository.check(name)) {
+    public void check(String name, String username) {
+        if (!isCreditCardNameUniqueByUsernameRepository.check(name, username)) {
             throw new ApplicationException(CREDIT_CARD_NAME_ALREADY_IN_USE);
-        }
-    }
-
-    public void check(String entityName, String name) {
-        if (!entityName.equals(name)) {
-            check(name);
         }
     }
 }
