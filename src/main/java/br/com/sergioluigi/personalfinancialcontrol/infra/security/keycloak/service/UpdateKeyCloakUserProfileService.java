@@ -1,9 +1,9 @@
 package br.com.sergioluigi.personalfinancialcontrol.infra.security.keycloak.service;
 
+import br.com.sergioluigi.personalfinancialcontrol.application.usecase.FindUserByUsername;
+import br.com.sergioluigi.personalfinancialcontrol.application.usecase.UpdateUser;
+import br.com.sergioluigi.personalfinancialcontrol.domain.UserModel;
 import br.com.sergioluigi.personalfinancialcontrol.domain.exception.ApplicationException;
-import br.com.sergioluigi.personalfinancialcontrol.domain.user.domain.UserModel;
-import br.com.sergioluigi.personalfinancialcontrol.domain.user.usecase.FindUserByUsername;
-import br.com.sergioluigi.personalfinancialcontrol.domain.user.usecase.UpdateUser;
 import org.keycloak.admin.client.Keycloak;
 import org.springframework.stereotype.Service;
 

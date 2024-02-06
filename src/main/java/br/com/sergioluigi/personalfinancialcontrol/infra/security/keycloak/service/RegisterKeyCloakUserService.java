@@ -1,8 +1,8 @@
 package br.com.sergioluigi.personalfinancialcontrol.infra.security.keycloak.service;
 
-import br.com.sergioluigi.personalfinancialcontrol.domain.user.domain.SubscriptionType;
-import br.com.sergioluigi.personalfinancialcontrol.domain.user.domain.UserModel;
-import br.com.sergioluigi.personalfinancialcontrol.domain.user.usecase.SaveNewUser;
+import br.com.sergioluigi.personalfinancialcontrol.domain.SubscriptionType;
+import br.com.sergioluigi.personalfinancialcontrol.domain.UserModel;
+import br.com.sergioluigi.personalfinancialcontrol.application.usecase.SaveNewUser;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.CredentialRepresentation;
