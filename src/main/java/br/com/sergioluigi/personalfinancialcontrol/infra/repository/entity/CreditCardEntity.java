@@ -38,7 +38,7 @@ public class CreditCardEntity {
     @Column(unique = true)
     private String name;
 
-    @ManyToOne(cascade = REMOVE)
+    @ManyToOne
     @JoinColumn(name = "account_id")
     private AccountEntity account;
 
@@ -78,6 +78,7 @@ public class CreditCardEntity {
         return CreditCardModel.builder()
                 .id(this.id)
                 .name(this.name)
+                .limit(limit)
                 .balance(this.balance)
                 .closingDate(this.closingDate)
                 .dueDate(this.dueDate)

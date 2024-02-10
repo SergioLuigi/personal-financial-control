@@ -1,6 +1,6 @@
 package br.com.sergioluigi.personalfinancialcontrol.infra.controller.validation;
 
-import br.com.sergioluigi.personalfinancialcontrol.application.usecase.FindAccountById;
+import br.com.sergioluigi.personalfinancialcontrol.usecase.account.FindAccountById;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;

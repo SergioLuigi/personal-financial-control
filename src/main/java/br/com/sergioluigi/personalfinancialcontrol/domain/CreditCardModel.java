@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Data
@@ -36,7 +37,19 @@ public class CreditCardModel {
         this.balance = creditCardModel.getBalance();
         this.dueDate = creditCardModel.getDueDate();
         this.closingDate = creditCardModel.closingDate;
-        this.createdOn = creditCardModel.createdOn;
         this.lastUpdateOn = creditCardModel.getLastUpdateOn();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CreditCardModel that = (CreditCardModel) o;
+        return Objects.equals(accountModel, that.accountModel) && Objects.equals(name, that.name) && Objects.equals(limit, that.limit) && Objects.equals(balance, that.balance) && Objects.equals(dueDate, that.dueDate) && Objects.equals(closingDate, that.closingDate) && Objects.equals(createdOn, that.createdOn);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(accountModel, name, limit, balance, dueDate, closingDate, createdOn);
     }
 }

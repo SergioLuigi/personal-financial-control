@@ -1,7 +1,7 @@
 package br.com.sergioluigi.personalfinancialcontrol.infra.controller.validation;
 
 
-import br.com.sergioluigi.personalfinancialcontrol.application.usecase.FindCreditCardById;
+import br.com.sergioluigi.personalfinancialcontrol.usecase.creditcard.FindCreditCardById;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;

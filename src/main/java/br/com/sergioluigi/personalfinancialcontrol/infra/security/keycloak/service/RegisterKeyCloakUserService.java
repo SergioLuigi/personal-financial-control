@@ -2,34 +2,40 @@ package br.com.sergioluigi.personalfinancialcontrol.infra.security.keycloak.serv
 
 import br.com.sergioluigi.personalfinancialcontrol.domain.SubscriptionType;
 import br.com.sergioluigi.personalfinancialcontrol.domain.UserModel;
-import br.com.sergioluigi.personalfinancialcontrol.application.usecase.SaveNewUser;
+import br.com.sergioluigi.personalfinancialcontrol.usecase.user.SaveNewUser;
+import br.com.sergioluigi.personalfinancialcontrol.domain.exception.ApplicationException;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static br.com.sergioluigi.personalfinancialcontrol.domain.exception.ExceptionsConstant.USER_ALREADY_EXISTS;
 
 @Service
 public class RegisterKeyCloakUserService extends AbstractKeyCloakService {
 
     private final SaveNewUser saveNewUser;
 
-    public RegisterKeyCloakUserService(
-            Keycloak keycloak,
-            SaveNewUser saveNewUser) {
+    public RegisterKeyCloakUserService(Keycloak keycloak, SaveNewUser saveNewUser) {
         super(keycloak);
         this.saveNewUser = saveNewUser;
     }
 
+    @Transactional
     public void execute(UserModel userModel) {
-        try {
+
+        this.getKeycloakUserByUsername(userModel.getUsername())
+                .ifPresent(user -> { throw new ApplicationException(USER_ALREADY_EXISTS); });
 
             userModel.setSubscriptionType(SubscriptionType.FREE);
             UserRepresentation userRepresentation = buildUserRepresentation(userModel);
 
-            var usersResource = this.getRealm().users();
+            var usersResource = this.getRealmUsers();
+
             var creationResponse = usersResource.create(userRepresentation);
 
             var userId = CreatedResponseUtil.getCreatedId(creationResponse);
@@ -46,10 +52,6 @@ public class RegisterKeyCloakUserService extends AbstractKeyCloakService {
             userResource.resetPassword(passwordCred);
 
             saveNewUser.execute(userModel);
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private static UserRepresentation buildUserRepresentation(UserModel userModel) {

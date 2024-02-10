@@ -1,9 +1,9 @@
 package br.com.sergioluigi.personalfinancialcontrol.infra.controller;
 
-import br.com.sergioluigi.personalfinancialcontrol.application.usecase.*;
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.model.AccountRequest;
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.model.AccountResponse;
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.validation.IsAuthenticatedUserAccountOwner;
+import br.com.sergioluigi.personalfinancialcontrol.usecase.account.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

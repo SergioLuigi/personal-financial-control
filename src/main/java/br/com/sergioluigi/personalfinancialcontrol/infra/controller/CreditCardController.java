@@ -1,9 +1,9 @@
 package br.com.sergioluigi.personalfinancialcontrol.infra.controller;
 
-import br.com.sergioluigi.personalfinancialcontrol.application.usecase.*;
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.model.CreditCardRequest;
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.model.CreditCardResponse;
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.validation.IsAuthenticatedUserCreditCardOwner;
+import br.com.sergioluigi.personalfinancialcontrol.usecase.creditcard.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,6 +13,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.*;
@@ -61,11 +62,19 @@ public class CreditCardController {
         return new CreditCardResponse(this.updateCreditCard.execute(id, creditCardRequest.toModel()));
     }
 
+    @ResponseStatus(OK)
+    @PatchMapping("/{id}")
+    @IsAuthenticatedUserCreditCardOwner
+    public CreditCardResponse patch(
+            @PathVariable UUID id,
+            @RequestBody Map<String, Object> properties) {
+        return new CreditCardResponse(this.updateCreditCard.execute(id, properties));
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
     @IsAuthenticatedUserCreditCardOwner
     public void delete(@PathVariable UUID id) {
         this.deleteCreditCard.execute(id);
     }
-
 }

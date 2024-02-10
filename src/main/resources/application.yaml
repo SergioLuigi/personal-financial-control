@@ -35,8 +35,8 @@ spring:
         provider:
           keycloak:
             issuer-uri: ${KEYCLOAK_URL}/realms/personal-financial-control-realm
-            jwk-set-uri: ${KEYCLOAK_URL}/realms/personal-financial-control-realm/protocol/openid-connect/certs
             user-name-attribute: preferred_username
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_URL}/realms/personal-financial-control-realm
+          jwk-set-uri: ${KEYCLOAK_URL}/realms/personal-financial-control-realm/protocol/openid-connect/certs

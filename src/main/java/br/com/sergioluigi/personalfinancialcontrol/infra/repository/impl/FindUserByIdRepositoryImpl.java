@@ -1,7 +1,7 @@
 package br.com.sergioluigi.personalfinancialcontrol.infra.repository.impl;
 
 import br.com.sergioluigi.personalfinancialcontrol.application.gateway.FindUserByIdRepository;
-import br.com.sergioluigi.personalfinancialcontrol.application.gateway.UserRepository;
+import br.com.sergioluigi.personalfinancialcontrol.infra.repository.UserRepository;
 import br.com.sergioluigi.personalfinancialcontrol.domain.UserModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

@@ -1,13 +1,11 @@
 package br.com.sergioluigi.personalfinancialcontrol.infra.security.keycloak.service;
 
-import br.com.sergioluigi.personalfinancialcontrol.application.usecase.FindUserByUsername;
-import br.com.sergioluigi.personalfinancialcontrol.application.usecase.UpdateUser;
+import br.com.sergioluigi.personalfinancialcontrol.usecase.user.FindUserByUsername;
+import br.com.sergioluigi.personalfinancialcontrol.usecase.user.UpdateUser;
 import br.com.sergioluigi.personalfinancialcontrol.domain.UserModel;
 import br.com.sergioluigi.personalfinancialcontrol.domain.exception.ApplicationException;
 import org.keycloak.admin.client.Keycloak;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 import static br.com.sergioluigi.personalfinancialcontrol.domain.exception.ExceptionsConstant.*;
 
@@ -30,7 +28,7 @@ public class UpdateKeyCloakUserProfileService extends AbstractKeyCloakService {
 
         var databaseUser = findUserByUsername.execute(username);
 
-        var keyCloakUser = Optional.ofNullable(getKeycloakUserByUsername(username))
+        var keyCloakUser = getKeycloakUserByUsername(username)
                 .orElseThrow(() -> new ApplicationException(USER_NOT_FOUND));
 
         if (!databaseUser.getEmail().equals(keyCloakUser.getEmail()) ||

@@ -1,8 +1,8 @@
 package br.com.sergioluigi.personalfinancialcontrol.infra.controller;
 
-import br.com.sergioluigi.personalfinancialcontrol.application.usecase.*;
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.model.CategoryRequest;
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.model.CategoryResponse;
+import br.com.sergioluigi.personalfinancialcontrol.usecase.category.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
