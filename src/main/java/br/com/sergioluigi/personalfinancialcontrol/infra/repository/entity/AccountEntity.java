@@ -1,6 +1,7 @@
 package br.com.sergioluigi.personalfinancialcontrol.infra.repository.entity;
 
 import br.com.sergioluigi.personalfinancialcontrol.domain.AccountModel;
+import br.com.sergioluigi.personalfinancialcontrol.domain.AccountType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,6 +39,10 @@ public class AccountEntity {
 
     @Column(nullable = false)
     private Double overdraftLimit;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AccountType type;
 
     @Column(nullable = false)
     private Double balance;

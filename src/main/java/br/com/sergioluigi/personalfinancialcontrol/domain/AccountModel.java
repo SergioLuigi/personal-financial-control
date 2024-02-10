@@ -23,6 +23,8 @@ public class AccountModel {
 
     private String name;
 
+    private AccountType type;
+
     private Double overdraftLimit;
 
     private Double balance;

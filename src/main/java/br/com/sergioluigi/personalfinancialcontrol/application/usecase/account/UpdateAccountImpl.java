@@ -53,7 +53,7 @@ public class UpdateAccountImpl implements UpdateAccount {
         var account = findAccountById.execute(id);
         var accountRequest = new AccountRequest(account.getName(),
                 account.getOverdraftLimit(),
-                account.getBalance());
+                account.getBalance(),account.getType());
 
         properties.forEach((fieldName, newValue) -> {
 

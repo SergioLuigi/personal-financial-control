@@ -76,7 +76,6 @@ public class AccountController {
         return new AccountResponse(adjustAccountLimit.execute(id, request.amount()));
     }
 
-
     @ResponseStatus(OK)
     @PatchMapping("/{id}")
     @IsAuthenticatedUserAccountOwner
