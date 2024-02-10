@@ -6,4 +6,6 @@ databaseChangeLog:
   - include:
       file: /db/changelog/changes/V3_0__CREATE_TABLE_ACCOUNT.yaml
   - include:
+      file: /db/changelog/changes/V5_0__ADD_COLUMN_TYPE_TO_ACCOUNT.yaml
+  - include:
       file: /db/changelog/changes/V4_0__CREATE_TABLE_CREDIT_CARD.yaml

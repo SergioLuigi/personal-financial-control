@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: V5_0__ADD_COLUMN_TYPE_TO_ACCOUNT
+      author: Sergio Luigi
+      changes:
+        - addColumn:
+            tableName: account
+            columns:
+              - column:
+                  name: account_type
+                  type: VARCHAR(150)
+                  constraints:
+                    nullable: false

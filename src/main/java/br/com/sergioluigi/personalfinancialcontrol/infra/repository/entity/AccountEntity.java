@@ -40,8 +40,8 @@ public class AccountEntity {
     @Column(nullable = false)
     private Double overdraftLimit;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @Column(name = "account_type", nullable = false)
     private AccountType type;
 
     @Column(nullable = false)
@@ -65,6 +65,7 @@ public class AccountEntity {
                 .name(accountModel.getName())
                 .overdraftLimit(accountModel.getOverdraftLimit())
                 .balance(accountModel.getBalance())
+                .type(accountModel.getType())
                 .createdOn(accountModel.getCreatedOn())
                 .lastUpdateOn(accountModel.getLastUpdateOn())
                 .user(new UserEntity(accountModel.getUser()))
@@ -77,6 +78,7 @@ public class AccountEntity {
                 .name(name)
                 .overdraftLimit(overdraftLimit)
                 .balance(balance)
+                .type(type)
                 .user(user.toModel())
                 .createdOn(createdOn)
                 .lastUpdateOn(lastUpdateOn)
