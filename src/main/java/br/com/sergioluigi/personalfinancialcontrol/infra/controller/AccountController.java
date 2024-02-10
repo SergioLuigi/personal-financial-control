@@ -2,9 +2,11 @@ package br.com.sergioluigi.personalfinancialcontrol.infra.controller;
 
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.model.AccountRequest;
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.model.AccountResponse;
+import br.com.sergioluigi.personalfinancialcontrol.infra.controller.model.AdjustAccountBalanceRequest;
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.validation.IsAuthenticatedUserAccountOwner;
 import br.com.sergioluigi.personalfinancialcontrol.usecase.account.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,7 @@ public class AccountController {
     private final UpdateAccount updateAccount;
     private final DeleteAccount deleteAccount;
     private final FindAccountPage findAccountPage;
+    private final AdjustAccountBalance adjustAccountBalance;
 
     @GetMapping
     @ResponseStatus(OK)
@@ -53,6 +56,14 @@ public class AccountController {
     @IsAuthenticatedUserAccountOwner
     public AccountResponse update(@PathVariable UUID id, @Valid @RequestBody AccountRequest accountRequest) {
         return new AccountResponse(updateAccount.execute(id, accountRequest.toModel()));
+    }
+
+    @ResponseStatus(OK)
+    @IsAuthenticatedUserAccountOwner
+    @PutMapping("/{id}/balance-adjustment")
+    public AccountResponse adjustBalance(@PathVariable UUID id,
+                                         @RequestBody @Valid AdjustAccountBalanceRequest request) {
+        return new AccountResponse(adjustAccountBalance.execute(id, request.amount()));
     }
 
     @ResponseStatus(OK)
