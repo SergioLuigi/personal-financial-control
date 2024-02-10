@@ -3,6 +3,7 @@ package br.com.sergioluigi.personalfinancialcontrol.infra.controller;
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.model.AccountRequest;
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.model.AccountResponse;
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.model.AdjustAccountBalanceRequest;
+import br.com.sergioluigi.personalfinancialcontrol.infra.controller.model.AdjustAccountLimitRequest;
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.validation.IsAuthenticatedUserAccountOwner;
 import br.com.sergioluigi.personalfinancialcontrol.usecase.account.*;
 import jakarta.validation.Valid;
@@ -30,6 +31,7 @@ public class AccountController {
     private final DeleteAccount deleteAccount;
     private final FindAccountPage findAccountPage;
     private final AdjustAccountBalance adjustAccountBalance;
+    private final AdjustAccountLimit adjustAccountLimit;
 
     @GetMapping
     @ResponseStatus(OK)
@@ -65,6 +67,15 @@ public class AccountController {
                                          @RequestBody @Valid AdjustAccountBalanceRequest request) {
         return new AccountResponse(adjustAccountBalance.execute(id, request.amount()));
     }
+
+    @ResponseStatus(OK)
+    @IsAuthenticatedUserAccountOwner
+    @PutMapping("/{id}/limit-adjustment")
+    public AccountResponse adjustLimit(@PathVariable UUID id,
+                                         @RequestBody @Valid AdjustAccountLimitRequest request) {
+        return new AccountResponse(adjustAccountLimit.execute(id, request.amount()));
+    }
+
 
     @ResponseStatus(OK)
     @PatchMapping("/{id}")
