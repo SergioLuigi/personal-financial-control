@@ -9,12 +9,15 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface AccountRepository extends JpaRepository<AccountEntity, UUID>,
         JpaSpecificationExecutor<AccountEntity> {
 
     Page<AccountEntity> findAllByUser_username(Pageable pageable, String username);
+
+    List<AccountEntity> findAllByUser_username(String username);
 
     boolean existsByNameAndUser_id(String name, UUID id);
 

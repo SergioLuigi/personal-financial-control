@@ -7,7 +7,6 @@ import br.com.sergioluigi.personalfinancialcontrol.infra.controller.model.Adjust
 import br.com.sergioluigi.personalfinancialcontrol.infra.controller.validation.IsAuthenticatedUserAccountOwner;
 import br.com.sergioluigi.personalfinancialcontrol.usecase.account.*;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +31,7 @@ public class AccountController {
     private final FindAccountPage findAccountPage;
     private final AdjustAccountBalance adjustAccountBalance;
     private final AdjustAccountLimit adjustAccountLimit;
+    private final GetAddedAccountBalances getAddedAccountBalances;
 
     @GetMapping
     @ResponseStatus(OK)
@@ -51,6 +51,12 @@ public class AccountController {
     @IsAuthenticatedUserAccountOwner
     public AccountResponse findById(@PathVariable UUID id) {
         return new AccountResponse(findAccountById.execute(id));
+    }
+
+    @ResponseStatus(OK)
+    @GetMapping("/added-balances")
+    public Double getAddedAccountBalances(Principal principal) {
+        return getAddedAccountBalances.execute(principal.getName());
     }
 
     @ResponseStatus(OK)
