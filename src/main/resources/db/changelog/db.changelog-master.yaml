@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: changes/001-create-bank-account-table.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: changes/002-create-event-publication-table.yaml
+      relativeToChangelogFile: true

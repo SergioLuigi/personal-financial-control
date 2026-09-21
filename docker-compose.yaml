@@ -1,0 +1,22 @@
+services:
+  mysql:
+    # Pinned: "latest" silently changes the engine under you between checkouts.
+    image: mysql:8.4
+    container_name: personal_financial_control_mysql
+    environment:
+      MYSQL_DATABASE: personal_financial_control
+      # MYSQL_USER/MYSQL_PASSWORD configure an *additional* user; the official image
+      # aborts on start if MYSQL_USER is set to "root".
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mysql_data:
