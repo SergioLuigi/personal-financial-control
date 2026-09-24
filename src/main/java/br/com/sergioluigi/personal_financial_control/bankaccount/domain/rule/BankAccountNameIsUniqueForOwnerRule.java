@@ -14,10 +14,12 @@ public class BankAccountNameIsUniqueForOwnerRule {
     }
 
     public void check(String name) {
-        bankAccountRepository
-            .findByNameAndOwner(name)
-            .ifPresent(existing -> {
-                throw new AlreadyExistsException("Bank account with name '" + name + "' already exists");
-            });
+        if (name != null) {
+            bankAccountRepository
+                    .findByNameAndOwner(name)
+                    .ifPresent(existing -> {
+                        throw new AlreadyExistsException("Bank account with name '" + name + "' already exists");
+                    });
+        }
     }
 }

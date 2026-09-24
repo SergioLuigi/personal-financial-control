@@ -27,7 +27,7 @@ class UpdateBankAccountUseCaseImpl implements UpdateBankAccountUseCase {
                 .findByIdAndOwner(id)
                 .orElseThrow(() -> new NotFoundException("Bank account not found"));
 
-        if (Objects.nonNull(changes.name()) && !existing.name().equals(changes.name())) {
+        if (!existing.name().equals(changes.name())) {
             nameIsUniqueForOwner.check(changes.name());
         }
 
