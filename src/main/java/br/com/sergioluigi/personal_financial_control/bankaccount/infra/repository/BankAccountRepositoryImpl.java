@@ -42,8 +42,7 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
 
         var spec = new BankAccountFilterEqualOwnerSpec(currentUser.getUsername())
                 .and(new BankAccountFilterLikeNameSpec(filter.name()))
-                .and(new BankAccountFilterLikeDescriptionSpec(filter.description()))
-                .and(new BankAccountFilterRangeBalanceSpec(filter.balanceRange()));
+                .and(new BankAccountFilterLikeDescriptionSpec(filter.description()));
 
         return repository.findAll(spec, pageable).map(BankAccountJpaEntity::toDomain);
     }

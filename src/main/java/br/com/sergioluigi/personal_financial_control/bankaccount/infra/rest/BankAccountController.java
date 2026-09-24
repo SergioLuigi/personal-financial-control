@@ -36,6 +36,12 @@ class BankAccountController {
 
     private final FindBankAccountsPageUseCase findBankAccountsPage;
 
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    BankAccountResponse create(@Valid @RequestBody CreateUpdateBankAccountRequest request) {
+        return BankAccountResponse.from(createBankAccount.execute(request.toDomain()));
+    }
+
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     PagedModel<BankAccountResponse> getPage(
@@ -53,12 +59,6 @@ class BankAccountController {
     @ResponseStatus(HttpStatus.OK)
     BankAccountResponse findById(@PathVariable String id) {
         return BankAccountResponse.from(findBankAccountById.execute(id));
-    }
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    BankAccountResponse create(@Valid @RequestBody CreateUpdateBankAccountRequest request) {
-        return BankAccountResponse.from(createBankAccount.execute(request.toDomain()));
     }
 
     @PutMapping("/{id}")
