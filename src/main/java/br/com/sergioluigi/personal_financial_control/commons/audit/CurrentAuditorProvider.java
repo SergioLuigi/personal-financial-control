@@ -11,10 +11,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CurrentAuditorProvider implements AuditorAware<String> {
 
+    static final String SYSTEM_AUDITOR = "system";
+
     private final CurrentUser currentUser;
 
     @Override
     public Optional<String> getCurrentAuditor() {
-        return currentUser.findUsername();
+        return currentUser.findUsername().or(() -> Optional.of(SYSTEM_AUDITOR));
     }
 }
