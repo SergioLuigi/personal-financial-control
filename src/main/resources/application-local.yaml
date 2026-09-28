@@ -1,0 +1,8 @@
+# Local development against the MySQL service of docker-compose.yaml:
+#   docker compose up -d
+#   SPRING_PROFILES_ACTIVE=local ./gradlew bootRun
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:3306/personal_financial_control
+    username: root
+    password: ${DB_PASSWORD:root}

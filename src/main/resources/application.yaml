@@ -2,10 +2,12 @@ spring:
   application:
     name: personal-financial-control
 
+  # Each environment supplies its own connection; see application-local.yaml for
+  # the MySQL service of docker-compose.yaml.
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:personal_financial_control}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:root}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
@@ -16,6 +18,8 @@ spring:
         # MySQL's DATETIME carries no offset; pinning the JDBC time zone keeps the audit
         # Instants round-tripping consistently regardless of the JVM default zone.
         jdbc.time_zone: UTC
+        # Every UUID is stored as varchar(36) (.claude/rules/database.md).
+        type.preferred_uuid_jdbc_type: VARCHAR
 
   liquibase:
     enabled: true

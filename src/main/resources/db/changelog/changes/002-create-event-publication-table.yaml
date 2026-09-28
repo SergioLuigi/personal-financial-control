@@ -1,0 +1,63 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-event-publication-table
+      author: sergioluigi
+      comment: >-
+        Event publication registry of Spring Modulith's JPA support, mapped by
+        DefaultJpaEventPublication. Required at start-up because the schema is
+        validated.
+      changes:
+        - createTable:
+            tableName: event_publication
+            columns:
+              - column:
+                  name: id
+                  type: varchar(36)
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_event_publication
+              - column:
+                  name: listener_id
+                  type: varchar(512)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: event_type
+                  type: varchar(512)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: serialized_event
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: publication_date
+                  type: datetime(6)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: completion_date
+                  type: datetime(6)
+              - column:
+                  name: last_resubmission_date
+                  type: datetime(6)
+              - column:
+                  name: completion_attempts
+                  type: int
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(20)
+        - createIndex:
+            tableName: event_publication
+            indexName: idx_event_publication_completion_date
+            columns:
+              - column:
+                  name: completion_date
+      rollback:
+        - dropTable:
+            tableName: event_publication

@@ -1,0 +1,59 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-bank-account-table
+      author: sergioluigi
+      changes:
+        - createTable:
+            tableName: bank_account
+            columns:
+              - column:
+                  name: id
+                  type: varchar(36)
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_bank_account
+              # Explicit collation: names are unique per owner ignoring case and
+              # accents (UC-01 FR-03), whatever the server default is.
+              - column:
+                  name: name
+                  type: varchar(60) COLLATE utf8mb4_0900_ai_ci
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(255)
+              - column:
+                  name: balance
+                  type: decimal(13, 2)
+                  constraints:
+                    nullable: false
+              # created_by is the owner of the account (NFR-01).
+              - column:
+                  name: created_by
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: datetime(6)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_by
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: datetime(6)
+                  constraints:
+                    nullable: false
+        # Also backs every query scoped to the owner.
+        - addUniqueConstraint:
+            tableName: bank_account
+            columnNames: created_by, name
+            constraintName: uk_bank_account_created_by_name
+      rollback:
+        - dropTable:
+            tableName: bank_account

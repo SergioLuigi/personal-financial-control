@@ -1,6 +1,6 @@
 # Bank accounts — Use cases
 
-**Status:** Draft · **Last updated:** 2026-09-27
+**Status:** Draft · **Last updated:** 2026-09-28
 
 Use cases UC-01 to UC-05 of the personal financial control application.
 Terms such as *accounting month*, *charge* or *removed* have the meaning given
@@ -23,7 +23,7 @@ this document. Every use case assumes an authenticated user (PRE-01).
 
 ## UC-01 — Create a bank account
 
-**Status:** Draft · **Last updated:** 2026-09-25 · **Related:** UC-02
+**Status:** Draft · **Last updated:** 2026-09-28 · **Related:** UC-02
 
 ### Objective
 
@@ -48,19 +48,20 @@ transactions can later be assigned to it.
 
 ### Data
 
-| Field             | Type          | Required | Constraints                                  |
-|-------------------|---------------|----------|----------------------------------------------|
-| `name`            | text          | Yes      | 1–60 chars, trimmed, unique per user          |
-| `description`     | text          | No       | 0–255 chars                                   |
-| `initial_balance` | decimal(13,2) | No       | Defaults to `0.00`; may be negative           |
+| Field         | Type          | Required | Constraints                                  |
+|---------------|---------------|----------|----------------------------------------------|
+| `name`        | text          | Yes      | 1–60 chars, trimmed, unique per user          |
+| `description` | text          | No       | 0–255 chars                                   |
+| `balance`     | decimal(13,2) | No       | The initial balance; defaults to `0.00`; may be negative |
 
 ### Functional requirements
 
 - FR-01 — The system persists a new bank account owned by the requesting user.
 - FR-02 — A bank account has a name, an optional description and a balance.
-- FR-03 — Account names are unique per user, compared case-insensitively and
-  after trimming surrounding whitespace. Two different users may each have an
-  account named "Savings".
+- FR-03 — Account names are stored in lowercase, after trimming surrounding
+  whitespace (Glossary, "Name"). They are unique per user, compared ignoring
+  case and accents. Two different users may each have an account named
+  "Savings".
 - FR-04 — When no initial balance is supplied, the balance is `0.00`.
 - FR-05 — The balance may be positive, zero or negative.
 - FR-06 — Creating a bank account is started from the bank accounts list
@@ -134,6 +135,8 @@ Triggered at step 5 when the description is longer than 255 characters.
 - AC-08 — Creating an account with an initial balance of `1000.00` makes its
   balance `1000.00`; no accounting month is involved and none needs to
   exist.
+- AC-09 — "poupanca" collides with an existing "Poupança" for the same user.
+- AC-10 — An account created as " Savings " is stored and shown as "savings".
 
 
 ## UC-02 — List bank accounts

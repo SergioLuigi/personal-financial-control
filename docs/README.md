@@ -10,6 +10,13 @@ this document. Every use case assumes an authenticated user (PRE-01).
 - [Glossary](glossary.md) — terms used with a single meaning across every document.
 - [Use case diagrams](use-case-diagrams.md) — one flow diagram per use case, plus navigation and state diagrams.
 
+## Implementation specs
+
+Spec-driven delivery of the use cases: each spec states what is delivered and
+how it is verified, its plan how it is built, and its tasks the order of work.
+
+- [Spec 001 — Create a bank account](specs/001-create-bank-account/spec.md) (UC-01) — [plan](specs/001-create-bank-account/plan.md), [tasks](specs/001-create-bank-account/tasks.md)
+
 ## Non-functional requirements
 
 Requirements that apply to every use case and are not repeated in each one.
@@ -20,9 +27,15 @@ Requirements that apply to every use case and are not repeated in each one.
   charges, incomes, receipts, refunds, bill payments, accounting months and
   closings — stores its audit fields (Glossary, "Audit fields"):
   `created_by`, `created_at`, `updated_by` and `updated_at`.
-- `created_by` and `updated_by` hold the username of the authenticated user
-  who performed the operation. Records written by the automated processes
-  (UC-41 to UC-43) use the author `system`.
+- `created_by` holds the username of the record's **owner** (Glossary,
+  "Owner"): the authenticated user who created it. A record created by an
+  automated process (UC-41 to UC-43) on a user's behalf has that user as
+  `created_by`.
+- `updated_by` holds the username of the user who last changed the record,
+  or `system` when an automated process changed it. It never makes anyone
+  the owner.
+- The owner of a record never changes: no operation can set or change
+  `created_by` after creation, and no request can choose it.
 - `created_at` and `updated_at` are timestamps stored in UTC.
 - `created_by` and `created_at` are set once, when the record is created, and
   never change. `updated_by` and `updated_at` are set on creation and
@@ -30,9 +43,8 @@ Requirements that apply to every use case and are not repeated in each one.
 - The system fills in the audit fields automatically. They are never taken
   from the user's input, and they are not shown to the user or returned by
   the API.
-- The audit fields do not replace the record's owner: the owner defines who
-  may see the record; the audit fields record who created and last changed
-  it, and when.
+- The owner defines who may see and change the record; the other audit
+  fields record when it was created, and who last changed it and when.
 
 ## Use cases by domain
 

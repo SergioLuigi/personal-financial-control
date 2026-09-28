@@ -8,15 +8,21 @@ this glossary disagree, the glossary wins and the use case must be fixed.
 
 ## Records
 
-- **Owner** — the user a record belongs to. Only the owner sees and changes
-  it.
+- **Owner** — the user a record belongs to, recorded as its `created_by`.
+  Only the owner sees and changes it. The owner is set when the record is
+  created and never changes.
 - **Audit fields** — who created a record and when (`created_by`,
   `created_at`), and who last changed it and when (`updated_by`,
   `updated_at`), kept for every record ([NFR-01](README.md#nfr-01--audit-trail)).
   They are filled in by the system, never by the user, and are not shown to
-  the user. The author is the user's username, or `system` for the automated
-  processes (UC-41 to UC-43). They are not the owner: the owner says whose
-  record it is; the audit fields say who touched it.
+  the user. `created_by` is the owner. `updated_by` is the user who made the
+  last change, or `system` for the automated processes (UC-41 to UC-43); it
+  never makes anyone the owner.
+- **Name** — the name a user gives to a record, such as a bank account, a
+  credit card or a category. It is stored and shown in lowercase, after
+  trimming surrounding whitespace, with its accents kept: "Poupança " is
+  stored as "poupança". The default data created by the system follows the
+  same rule.
 
 ## Money
 
