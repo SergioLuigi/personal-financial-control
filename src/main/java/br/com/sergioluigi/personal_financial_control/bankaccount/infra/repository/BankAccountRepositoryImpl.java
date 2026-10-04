@@ -7,9 +7,12 @@ import br.com.sergioluigi.personal_financial_control.bankaccount.domain.reposito
 import br.com.sergioluigi.personal_financial_control.bankaccount.infra.repository.entity.BankAccountJpaEntity;
 import br.com.sergioluigi.personal_financial_control.bankaccount.infra.repository.spec.BankAccountDescriptionContainsSpec;
 import br.com.sergioluigi.personal_financial_control.bankaccount.infra.repository.spec.BankAccountNameContainsSpec;
+import br.com.sergioluigi.personal_financial_control.bankaccount.infra.repository.spec.BankAccountMaxBalanceSpec;
+import br.com.sergioluigi.personal_financial_control.bankaccount.infra.repository.spec.BankAccountMinBalanceSpec;
 import br.com.sergioluigi.personal_financial_control.bankaccount.infra.repository.spec.BankAccountOwnerSpec;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
@@ -48,18 +51,19 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
     }
 
     /**
-     * Reads the owner's accounts whose name and description contain the filter text, ordered by name and id.
+     * Reads a page of the owner's accounts whose name and description contain the filter text and whose stored
+     * balance is within its bounds.
      */
     @Override
-    public List<BankAccount> findAllByOwner(String owner, BankAccountFilter filter) {
+    public Page<BankAccount> findAllByOwner(String owner, BankAccountFilter filter, Pageable pageable) {
         Specification<BankAccountJpaEntity> specification = Specification.allOf(
                 new BankAccountOwnerSpec(owner),
                 new BankAccountNameContainsSpec(filter.name()),
-                new BankAccountDescriptionContainsSpec(filter.description()));
+                new BankAccountDescriptionContainsSpec(filter.description()),
+                new BankAccountMinBalanceSpec(filter.minBalance()),
+                new BankAccountMaxBalanceSpec(filter.maxBalance()));
 
-        return jpaRepository.findAll(specification, Sort.by("name", "id")).stream()
-                .map(BankAccountJpaEntity::toDomain)
-                .toList();
+        return jpaRepository.findAll(specification, pageable).map(BankAccountJpaEntity::toDomain);
     }
 
     /** Reads the owner's accounts among those ids. */

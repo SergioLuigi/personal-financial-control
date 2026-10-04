@@ -1,12 +1,13 @@
 package br.com.sergioluigi.personal_financial_control.bankaccount.infra.rest;
 
+import br.com.sergioluigi.personal_financial_control.bankaccount.infra.rest.dto.ListBankAccountsRequest;
+import br.com.sergioluigi.personal_financial_control.commons.pagination.PageRequests;
 import br.com.sergioluigi.personal_financial_control.commons.pagination.PageResponse;
 import br.com.sergioluigi.personal_financial_control.commons.web.PathIds;
 import br.com.sergioluigi.personal_financial_control.bankaccount.application.usecase.CreateBankAccountUseCase;
 import br.com.sergioluigi.personal_financial_control.bankaccount.application.usecase.GetBankAccountUseCase;
 import br.com.sergioluigi.personal_financial_control.bankaccount.application.usecase.ListBankAccountsUseCase;
 import br.com.sergioluigi.personal_financial_control.bankaccount.application.usecase.UpdateBankAccountUseCase;
-import br.com.sergioluigi.personal_financial_control.bankaccount.domain.repository.model.BankAccountFilter;
 import br.com.sergioluigi.personal_financial_control.bankaccount.infra.rest.dto.BankAccountDetailsResponse;
 import br.com.sergioluigi.personal_financial_control.bankaccount.infra.rest.dto.BankAccountResponse;
 import br.com.sergioluigi.personal_financial_control.bankaccount.infra.rest.dto.CreateBankAccountRequest;
@@ -16,6 +17,8 @@ import br.com.sergioluigi.personal_financial_control.bankaccount.application.use
 import br.com.sergioluigi.personal_financial_control.commons.deletion.DeletionPreviewResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +32,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
-import java.math.BigDecimal;
 import java.util.Map;
 
 /** The {@code /bank-accounts} endpoints. */
@@ -68,25 +70,18 @@ class BankAccountController {
      * Lists one page of accounts.
      *
      * @param principal the authenticated user
-     * @param page the page number, from 0
-     * @param name text the name must contain
-     * @param description text the description must contain
-     * @param minBalance the lowest balance accepted
-     * @param maxBalance the highest balance accepted
+     * @param request the filters, all optional
+     * @param pageable the page, size and order asked for; the list defines the defaults
      * @return the page of accounts
      */
     @GetMapping
     PageResponse<BankAccountResponse> list(
             Principal principal,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String description,
-            @RequestParam(name = "min_balance", required = false) BigDecimal minBalance,
-            @RequestParam(name = "max_balance", required = false) BigDecimal maxBalance
+            ListBankAccountsRequest request,
+            @PageableDefault(sort = "name") Pageable pageable
     ) {
-        var filter = new BankAccountFilter(name, description, minBalance, maxBalance);
-
-        return PageResponse.from(listBankAccountsUseCase.execute(principal.getName(), filter, page), BankAccountResponse::from);
+        return PageResponse.from(
+                listBankAccountsUseCase.execute(principal.getName(), request.toDomain(), pageable), BankAccountResponse::from);
     }
 
     /**
