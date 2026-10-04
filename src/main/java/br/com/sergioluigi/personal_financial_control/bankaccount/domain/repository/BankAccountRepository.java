@@ -4,6 +4,9 @@ import br.com.sergioluigi.personal_financial_control.bankaccount.domain.model.Ba
 import br.com.sergioluigi.personal_financial_control.bankaccount.domain.model.NewBankAccount;
 import br.com.sergioluigi.personal_financial_control.bankaccount.domain.repository.model.BankAccountFilter;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -39,13 +42,14 @@ public interface BankAccountRepository {
     Optional<BankAccount> findByOwnerAndId(String owner, UUID id);
 
     /**
-     * The owner's accounts matching the filter, except for its balance bounds, ordered by name and id.
+     * The owner's accounts matching the filter, balance bounds included, as the requested page.
      *
      * @param owner the user who owns the accounts
      * @param filter the criteria of the list
-     * @return the accounts found
+     * @param pageable the page, its size and its order
+     * @return the page of accounts found
      */
-    List<BankAccount> findAllByOwner(String owner, BankAccountFilter filter);
+    Page<BankAccount> findAllByOwner(String owner, BankAccountFilter filter, Pageable pageable);
 
     /**
      * Reads the owner's accounts among those ids.
