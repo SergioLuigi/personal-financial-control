@@ -12,9 +12,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+/** Security setup: stateless HTTP Basic authentication, with only the health endpoint open. */
 @Configuration
 class SecurityConfig {
 
+    /**
+     * Requires authentication on everything but {@code /actuator/health}; no CSRF and no session, since
+     * every request carries its own credentials.
+     *
+     * @param http the builder of the filter chain
+     * @return the filter chain
+     */
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) {
         return http
@@ -27,11 +35,22 @@ class SecurityConfig {
                 .build();
     }
 
+    /**
+     * The encoder for passwords, which also recognizes the prefix of each stored hash.
+     *
+     * @return the delegating encoder
+     */
     @Bean
     PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+    /**
+     * The only user of the application, kept in memory: sign-up and user management are out of scope.
+     *
+     * @param passwordEncoder encodes the password of the user
+     * @return the user store
+     */
     @Bean
     InMemoryUserDetailsManager userDetailsManager(
             PasswordEncoder passwordEncoder

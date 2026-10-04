@@ -3,38 +3,31 @@ package br.com.sergioluigi.personal_financial_control.bankaccount.domain.model;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class BankAccountTest {
 
-    @Test
-    void balanceDefaultsToZeroWhenAbsent() {
-        var bankAccount = BankAccount.create("alice", new NewBankAccount("savings", null, null));
+    private final BankAccount account =
+            new BankAccount(UUID.randomUUID(), "alice", "savings", "main", new BigDecimal("10.00"));
 
-        assertThat(bankAccount.balance()).isEqualTo(new BigDecimal("0.00"));
+    @Test
+    void appliesOnlyTheSuppliedFields() {
+        var updated = account.apply(new BankAccountChanges(" Checking ", null, null));
+
+        assertThat(updated.name()).isEqualTo("checking");
+        assertThat(updated.description()).isEqualTo("main");
+        assertThat(updated.balance()).isEqualByComparingTo("10.00");
     }
 
     @Test
-    void keepsTheGivenBalanceWithTwoDecimalPlaces() {
-        var bankAccount = BankAccount.create("alice", new NewBankAccount("savings", null, new BigDecimal("-150")));
-
-        assertThat(bankAccount.balance()).isEqualTo(new BigDecimal("-150.00"));
+    void anEmptyDescriptionClearsIt() {
+        assertThat(account.apply(new BankAccountChanges(null, "", null)).description()).isEmpty();
     }
 
     @Test
-    void belongsToTheGivenOwnerAndGetsAnId() {
-        var bankAccount = BankAccount.create("alice", new NewBankAccount("savings", "Emergency fund", null));
-
-        assertThat(bankAccount.owner()).isEqualTo("alice");
-        assertThat(bankAccount.id()).isNotNull();
-        assertThat(bankAccount.description()).isEqualTo("Emergency fund");
-    }
-
-    @Test
-    void nameIsTrimmedAndLowercasedKeepingAccents() {
-        var newBankAccount = new NewBankAccount("  Poupança ", null, null);
-
-        assertThat(newBankAccount.name()).isEqualTo("poupança");
+    void noChangesLeaveTheAccountEqual() {
+        assertThat(account.apply(new BankAccountChanges(null, null, null))).isEqualTo(account);
     }
 }

@@ -5,28 +5,26 @@ import br.com.sergioluigi.personal_financial_control.bankaccount.domain.model.Ba
 import br.com.sergioluigi.personal_financial_control.bankaccount.domain.model.NewBankAccount;
 import br.com.sergioluigi.personal_financial_control.bankaccount.domain.repository.BankAccountRepository;
 import br.com.sergioluigi.personal_financial_control.bankaccount.domain.rule.BankAccountNameIsUniqueForOwnerRule;
-import br.com.sergioluigi.personal_financial_control.commons.security.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Implements {@link CreateBankAccountUseCase}. */
 @Service
 @RequiredArgsConstructor
 class CreateBankAccountUseCaseImpl implements CreateBankAccountUseCase {
 
-    private final CurrentUser currentUser;
+    /** Rejects a name the owner already uses. */
+    private final BankAccountNameIsUniqueForOwnerRule nameIsUniqueForOwnerRule;
+    /** Stores the account. */
+    private final BankAccountRepository repository;
 
-    private final BankAccountNameIsUniqueForOwnerRule nameIsUniqueForOwner;
-
-    private final BankAccountRepository bankAccountRepository;
-
+    /** Checks the name is free for the current user, then stores the account. */
     @Override
     @Transactional
-    public BankAccount execute(NewBankAccount newBankAccount) {
-        var owner = currentUser.getUsername();
+    public BankAccount execute(String owner, NewBankAccount bankAccount) {
+        nameIsUniqueForOwnerRule.check(owner, bankAccount.name());
 
-        nameIsUniqueForOwner.check(owner, newBankAccount.name());
-
-        return bankAccountRepository.create(BankAccount.create(owner, newBankAccount));
+        return repository.save(owner, bankAccount);
     }
 }

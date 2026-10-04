@@ -13,11 +13,9 @@ databaseChangeLog:
                     nullable: false
                     primaryKey: true
                     primaryKeyName: pk_bank_account
-              # Explicit collation: names are unique per owner ignoring case and
-              # accents (UC-01 FR-03), whatever the server default is.
               - column:
                   name: name
-                  type: varchar(60) COLLATE utf8mb4_0900_ai_ci
+                  type: varchar(60)
                   constraints:
                     nullable: false
               - column:
@@ -25,10 +23,18 @@ databaseChangeLog:
                   type: varchar(255)
               - column:
                   name: balance
-                  type: decimal(13, 2)
+                  type: decimal(13,2)
+                  defaultValueNumeric: 0
                   constraints:
                     nullable: false
-              # created_by is the owner of the account (NFR-01).
+              # Empty while the bank account is in use. A bank account deleted logically because it has entries in a consolidated
+              # month keeps its own id here, so its name is free to use again while the closings can still refer to it (UC-05 FR-06).
+              - column:
+                  name: deleted_id
+                  type: varchar(36)
+                  defaultValue: ""
+                  constraints:
+                    nullable: false
               - column:
                   name: created_by
                   type: varchar(255)
@@ -49,11 +55,16 @@ databaseChangeLog:
                   type: datetime(6)
                   constraints:
                     nullable: false
-        # Also backs every query scoped to the owner.
+        # Names are unique per owner ignoring case and accents (UC-01 FR-03), so the
+        # collation is explicit instead of relying on the server default.
+        - sql:
+            sql: >-
+              ALTER TABLE bank_account
+              MODIFY name varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
         - addUniqueConstraint:
             tableName: bank_account
-            columnNames: created_by, name
-            constraintName: uk_bank_account_created_by_name
+            columnNames: created_by, name, deleted_id
+            constraintName: uk_bank_account_created_by_name_deleted_id
       rollback:
         - dropTable:
             tableName: bank_account

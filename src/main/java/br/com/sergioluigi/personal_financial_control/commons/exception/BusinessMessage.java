@@ -9,13 +9,25 @@ import org.springframework.http.HttpStatus;
  */
 public interface BusinessMessage {
 
+    /**
+     * The HTTP status the violation is answered with.
+     *
+     * @return the status
+     */
     HttpStatus status();
 
     /**
      * The request field the violation refers to, or {@code null} when it concerns
      * the request as a whole.
+     *
+     * @return the field name, or {@code null}
      */
     @Nullable String field();
 
+    /**
+     * The English text that describes the violation.
+     *
+     * @return the text
+     */
     String message();
 }

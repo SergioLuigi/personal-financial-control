@@ -7,10 +7,15 @@ import jakarta.validation.constraints.Size;
 import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
+/**
+ * The body of the request that creates a bank account.
+ *
+ * @param name the name, required and at most 60 characters
+ * @param description a free text, at most 255 characters
+ * @param balance the initial balance, with at most two decimal places; zero when absent
+ */
 public record CreateBankAccountRequest(
-
         @NotBlank(message = "Name is required")
         @Size(max = 60, message = "Name must be at most 60 characters")
         @Nullable String name,
@@ -22,13 +27,17 @@ public record CreateBankAccountRequest(
         @Nullable BigDecimal balance
 ) {
 
-    // Normalized before validation, so that lengths are checked on the trimmed values.
+    /** Trims the name before it is validated. */
     public CreateBankAccountRequest {
         name = name == null ? null : name.strip();
-        description = description == null || description.isBlank() ? null : description.strip();
     }
 
+    /**
+     * Converts the request into the domain model.
+     *
+     * @return the account to create
+     */
     public NewBankAccount toDomain() {
-        return new NewBankAccount(Objects.requireNonNull(name), description, balance);
+        return new NewBankAccount(name, description, balance);
     }
 }

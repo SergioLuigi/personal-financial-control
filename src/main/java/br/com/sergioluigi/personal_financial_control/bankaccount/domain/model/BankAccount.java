@@ -1,30 +1,41 @@
 package br.com.sergioluigi.personal_financial_control.bankaccount.domain.model;
 
-import org.jspecify.annotations.Nullable;
-
 import java.math.BigDecimal;
-import java.util.Objects;
 import java.util.UUID;
 
-public record BankAccount(
-        UUID id,
-        String owner,
-        String name,
-        @Nullable String description,
-        BigDecimal balance
-) {
+/**
+ * A bank account of a user.
+ *
+ * @param id the id of the account
+ * @param owner the user who owns the account
+ * @param name the name of the account, unique for its owner, in lowercase
+ * @param description a free text about the account; empty when none was given
+ * @param balance the balance of the account
+ */
+public record BankAccount(UUID id, String owner, String name, String description, BigDecimal balance) {
 
-    private static final int BALANCE_SCALE = 2;
-
-    public static BankAccount create(String owner, NewBankAccount newBankAccount) {
-        var balance = Objects.requireNonNullElse(newBankAccount.balance(), BigDecimal.ZERO);
-
+    /**
+     * Applies the fields supplied in {@code changes}; the others keep their value.
+     *
+     * @param changes the fields to change
+     * @return the account with the changes applied
+     */
+    public BankAccount apply(BankAccountChanges changes) {
         return new BankAccount(
-                UUID.randomUUID(),
+                id,
                 owner,
-                newBankAccount.name(),
-                newBankAccount.description(),
-                balance.setScale(BALANCE_SCALE)
-        );
+                changes.name() == null ? name : changes.name(),
+                changes.description() == null ? description : changes.description(),
+                changes.balance() == null ? balance : changes.balance());
+    }
+
+    /**
+     * The same account with another balance.
+     *
+     * @param newBalance the balance of the new account
+     * @return the account with that balance
+     */
+    public BankAccount withBalance(BigDecimal newBalance) {
+        return new BankAccount(id, owner, name, description, newBalance);
     }
 }

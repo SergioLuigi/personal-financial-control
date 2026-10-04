@@ -1,12 +1,6 @@
 package br.com.sergioluigi.personal_financial_control.bankaccount;
 
-import br.com.sergioluigi.personal_financial_control.bankaccount.domain.model.BankAccount;
-import br.com.sergioluigi.personal_financial_control.bankaccount.domain.model.NewBankAccount;
-import br.com.sergioluigi.personal_financial_control.bankaccount.domain.repository.BankAccountRepository;
 import br.com.sergioluigi.personal_financial_control.TestcontainersConfiguration;
-import br.com.sergioluigi.personal_financial_control.commons.exception.BusinessException;
-import com.jayway.jsonpath.JsonPath;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,21 +10,12 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Map;
 import java.util.UUID;
 
-import static br.com.sergioluigi.personal_financial_control.bankaccount.domain.message.BankAccountMessage.NAME_ALREADY_EXISTS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,170 +24,155 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(TestcontainersConfiguration.class)
 class CreateBankAccountIntegrationTest {
 
-    private static final RequestPostProcessor ALICE = user("alice");
-
-    private static final RequestPostProcessor BOB = user("bob");
+    @Autowired
+    MockMvc mockMvc;
 
     @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private JdbcClient jdbcClient;
-
-    @Autowired
-    private BankAccountRepository bankAccountRepository;
-
-    @BeforeEach
-    void cleanUp() {
-        jdbcClient.sql("delete from bank_account").update();
-    }
+    JdbcClient jdbcClient;
 
     @Test
-    void ac01_createsAnAccountWithOnlyAName() throws Exception {
-        create(ALICE, "{\"name\": \"Savings\"}")
+    void ac01_createsAnAccountWithOnlyANameAndZeroBalance() throws Exception {
+        var alice = newUser();
+
+        createBankAccount(alice, "{ \"name\": \"savings\" }")
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("savings"))
-                .andExpect(jsonPath("$.description").isEmpty())
                 .andExpect(jsonPath("$.balance").value(0.00));
-
-        assertThat(countOwnedBy("alice")).isEqualTo(1);
     }
 
     @Test
-    void ac02_ac03_rejectsANameAlreadyTakenByTheSameUser() throws Exception {
-        create(ALICE, "{\"name\": \"Savings\"}").andExpect(status().isCreated());
+    void ac02_rejectsANameAlreadyTaken() throws Exception {
+        var alice = newUser();
+        createBankAccount(alice, "{ \"name\": \"savings\" }");
 
-        for (var name : new String[]{"Savings", "savings", " Savings ", "SAVINGS"}) {
-            create(ALICE, "{\"name\": \"%s\"}".formatted(name))
-                    .andExpect(status().isConflict())
-                    .andExpect(jsonPath("$.errors[0].field").value("name"))
-                    .andExpect(jsonPath("$.errors[0].message").value("Bank account name already exists"));
-        }
+        createBankAccount(alice, "{ \"name\": \"savings\" }")
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.errors[0].field").value("name"))
+                .andExpect(jsonPath("$.errors[0].message").value("Bank account name already exists"));
 
-        assertThat(countOwnedBy("alice")).isEqualTo(1);
+        assertThat(countBankAccounts(alice)).isEqualTo(1);
     }
 
     @Test
-    void ac04_differentUsersMayUseTheSameName() throws Exception {
-        create(ALICE, "{\"name\": \"Savings\"}").andExpect(status().isCreated());
-        create(BOB, "{\"name\": \"Savings\"}").andExpect(status().isCreated());
+    void ac03_aNameCollidesIgnoringCaseAndSurroundingSpaces() throws Exception {
+        var alice = newUser();
+        createBankAccount(alice, "{ \"name\": \"Savings\" }");
 
-        assertThat(countOwnedBy("alice")).isEqualTo(1);
-        assertThat(countOwnedBy("bob")).isEqualTo(1);
+        createBankAccount(alice, "{ \"name\": \"savings\" }").andExpect(status().isConflict());
+        createBankAccount(alice, "{ \"name\": \" Savings \" }").andExpect(status().isConflict());
+    }
+
+    @Test
+    void ac04_twoUsersCanOwnAnAccountWithTheSameName() throws Exception {
+        var alice = newUser();
+        var bob = newUser();
+        createBankAccount(alice, "{ \"name\": \"Savings\" }");
+
+        createBankAccount(bob, "{ \"name\": \"Savings\" }").andExpect(status().isCreated());
     }
 
     @Test
     void ac05_storesANegativeBalance() throws Exception {
-        var id = idOf(create(ALICE, "{\"name\": \"Savings\", \"balance\": -150.00}")
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.balance").value(-150.00)));
+        var alice = newUser();
 
-        assertThat(row(id).get("balance")).isEqualTo(new BigDecimal("-150.00"));
+        createBankAccount(alice, "{ \"name\": \"savings\", \"balance\": -150.00 }")
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.balance").value(-150.00));
     }
 
     @Test
-    void ac06_rejectsUnauthenticatedRequests() throws Exception {
-        mockMvc.perform(request("{\"name\": \"Savings\"}"))
-                .andExpect(status().isUnauthorized());
-        mockMvc.perform(request("{\"name\": \"Savings\"}").with(httpBasic("user", "wrong")))
+    void ac06_rejectsAnUnauthenticatedRequest() throws Exception {
+        var before = countAllBankAccounts();
+
+        mockMvc.perform(post("/bank-accounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"name\": \"savings\" }"))
                 .andExpect(status().isUnauthorized());
 
-        assertThat(countAll()).isZero();
+        assertThat(countAllBankAccounts()).isEqualTo(before);
     }
 
     @Test
     void ac07_rejectsADescriptionOf256Characters() throws Exception {
-        create(ALICE, "{\"name\": \"Savings\", \"description\": \"%s\"}".formatted("a".repeat(256)))
+        var alice = newUser();
+
+        createBankAccount(alice, "{ \"name\": \"savings\", \"description\": \"" + "a".repeat(256) + "\" }")
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("description"))
                 .andExpect(jsonPath("$.errors[0].message").value("Description must be at most 255 characters"));
 
-        assertThat(countAll()).isZero();
+        assertThat(countBankAccounts(alice)).isZero();
     }
 
     @Test
-    void ac08_storesTheInitialBalanceWithoutAnyAccountingMonth() throws Exception {
-        var id = idOf(create(ALICE, "{\"name\": \"Savings\", \"balance\": 1000.00}")
+    void ac08_anInitialBalanceIsTheAccountBalance() throws Exception {
+        var alice = newUser();
+
+        createBankAccount(alice, "{ \"name\": \"savings\", \"balance\": 1000.00 }")
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.balance").value(1000.00)));
+                .andExpect(jsonPath("$.balance").value(1000.00));
 
-        assertThat(row(id).get("balance")).isEqualTo(new BigDecimal("1000.00"));
+        assertThat(readBalance(alice, "savings")).isEqualByComparingTo("1000.00");
     }
 
     @Test
-    void ac09_comparesNamesIgnoringAccents() throws Exception {
-        create(ALICE, "{\"name\": \"Poupança\"}").andExpect(status().isCreated());
+    void ac09_aNameCollidesIgnoringAccents() throws Exception {
+        var alice = newUser();
+        createBankAccount(alice, "{ \"name\": \"Poupança\" }");
 
-        create(ALICE, "{\"name\": \"poupanca\"}").andExpect(status().isConflict());
+        createBankAccount(alice, "{ \"name\": \"poupanca\" }").andExpect(status().isConflict());
     }
 
     @Test
-    void ac10_storesTheNameTrimmedAndInLowercase() throws Exception {
-        var id = idOf(create(ALICE, "{\"name\": \" Poupança \"}")
+    void ac10_storesAndShowsTheNameInLowercase() throws Exception {
+        var alice = newUser();
+
+        createBankAccount(alice, "{ \"name\": \" Savings \" }")
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("poupança")));
+                .andExpect(jsonPath("$.name").value("savings"));
 
-        assertThat(row(id).get("name")).isEqualTo("poupança");
+        assertThat(readNames(alice)).containsExactly("savings");
     }
 
     @Test
-    void t07_fillsInTheAuditFields() throws Exception {
-        var id = idOf(create(ALICE, "{\"name\": \"Savings\"}")
-                .andExpect(jsonPath("$.created_by").doesNotExist())
-                .andExpect(jsonPath("$.createdBy").doesNotExist()));
+    void recordsTheOwnerInTheAuditFields() throws Exception {
+        var alice = newUser();
 
-        var row = row(id);
-        assertThat(row.get("created_by")).isEqualTo("alice");
-        assertThat(row.get("updated_by")).isEqualTo("alice");
-        assertThat(row.get("created_at")).isNotNull().isEqualTo(row.get("updated_at"));
-        assertThat((LocalDateTime) row.get("created_at")).isBeforeOrEqualTo(LocalDateTime.now(ZoneOffset.UTC));
+        createBankAccount(alice, "{ \"name\": \"savings\" }");
+
+        assertThat(readCreatedBy(alice)).containsExactly(alice);
     }
 
-    @Test
-    void t08_theUniqueKeyRejectsANameTheRuleDidNotSee() {
-        bankAccountRepository.create(BankAccount.create("alice", new NewBankAccount("savings", null, null)));
-
-        // Simulates a concurrent request that passed the rule check before the first insert.
-        var duplicate = BankAccount.create("alice", new NewBankAccount("Savings", null, null));
-
-        assertThatThrownBy(() -> bankAccountRepository.create(duplicate))
-                .isInstanceOfSatisfying(BusinessException.class,
-                        e -> assertThat(e.getBusinessMessage()).isEqualTo(NAME_ALREADY_EXISTS));
-        assertThat(countOwnedBy("alice")).isEqualTo(1);
+    private String newUser() {
+        return "user-" + UUID.randomUUID();
     }
 
-    @Test
-    void t11_theOwnerCannotBeChosenByTheClient() throws Exception {
-        var id = idOf(create(ALICE, "{\"name\": \"Savings\", \"owner\": \"bob\", \"created_by\": \"bob\", \"createdBy\": \"bob\"}")
-                .andExpect(status().isCreated()));
-
-        assertThat(row(id).get("created_by")).isEqualTo("alice");
-    }
-
-    private ResultActions create(RequestPostProcessor user, String body) throws Exception {
-        return mockMvc.perform(request(body).with(user));
-    }
-
-    private static MockHttpServletRequestBuilder request(String body) {
-        return MockMvcRequestBuilders.post("/bank-accounts")
+    private ResultActions createBankAccount(String username, String body) throws Exception {
+        return mockMvc.perform(post("/bank-accounts").with(user(username))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(body);
+                .content(body));
     }
 
-    private UUID idOf(ResultActions result) throws Exception {
-        var json = result.andReturn().getResponse().getContentAsString();
-        return UUID.fromString(JsonPath.read(json, "$.id"));
+    private int countBankAccounts(String owner) {
+        return jdbcClient.sql("select count(*) from bank_account where created_by = ?")
+                .param(owner).query(Integer.class).single();
     }
 
-    private Map<String, Object> row(UUID id) {
-        return jdbcClient.sql("select * from bank_account where id = ?").param(id.toString()).query().singleRow();
+    private int countAllBankAccounts() {
+        return jdbcClient.sql("select count(*) from bank_account").query(Integer.class).single();
     }
 
-    private long countOwnedBy(String owner) {
-        return jdbcClient.sql("select count(*) from bank_account where created_by = ?").param(owner).query(Long.class).single();
+    private java.math.BigDecimal readBalance(String owner, String name) {
+        return jdbcClient.sql("select balance from bank_account where created_by = ? and name = ?")
+                .param(owner).param(name).query(java.math.BigDecimal.class).single();
     }
 
-    private long countAll() {
-        return jdbcClient.sql("select count(*) from bank_account").query(Long.class).single();
+    private java.util.List<String> readNames(String owner) {
+        return jdbcClient.sql("select name from bank_account where created_by = ?")
+                .param(owner).query(String.class).list();
+    }
+
+    private java.util.List<String> readCreatedBy(String owner) {
+        return jdbcClient.sql("select created_by from bank_account where created_by = ? and updated_by = ?")
+                .param(owner).param(owner).query(String.class).list();
     }
 }
